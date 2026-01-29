@@ -8,7 +8,7 @@ import pandas as pd
 
 from .models import UploadRecord
 
-
+# Protect API and modify decorators
 @api_view(['GET'])
 def health_check(request):
     return Response({
