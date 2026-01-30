@@ -1,9 +1,7 @@
+import Dashboard from "./pages/Dashboard";
+
 function App() {
-  return (
-    <div style={{ padding: "40px", fontSize: "20px" }}>
-      Chemical Equipment Visualizer – Web Dashboard
-    </div>
-  );
+  return <Dashboard />;
 }
 
 export default App;
