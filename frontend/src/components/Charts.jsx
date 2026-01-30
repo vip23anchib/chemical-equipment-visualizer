@@ -1,0 +1,46 @@
+import React from "react";
+import { Pie } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from "chart.js";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+function Charts({ summary }) {
+  if (!summary) return null;
+
+  const labels = Object.keys(summary.equipment_type_distribution);
+  const values = Object.values(summary.equipment_type_distribution);
+
+  const data = {
+    labels: labels,
+    datasets: [
+      {
+        label: "Equipment Count",
+        data: values,
+        backgroundColor: [
+          "#4CAF50",
+          "#2196F3",
+          "#FF9800",
+          "#E91E63",
+          "#9C27B0"
+        ],
+      },
+    ],
+  };
+
+  return (
+    <div style={{ width: "400px", marginTop: "30px" }}>
+      <h3>Equipment Type Distribution</h3>
+      <Pie data={data} />
+    </div>
+  );
+}
+
+export default function Charts() {
+  return <div>...</div>;
+}
+
