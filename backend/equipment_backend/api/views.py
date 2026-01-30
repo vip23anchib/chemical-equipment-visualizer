@@ -3,6 +3,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 
+from django.http import FileResponse
+from .pdf_utils import generate_pdf
+
+
 
 import pandas as pd
 
@@ -93,3 +97,25 @@ def upload_history(request):
         })
 
     return Response(data)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def download_pdf(request):
+    record = UploadRecord.objects.order_by('-uploaded_at').first()
+
+    if not record:
+        return Response({"error": "No data available"}, status=400)
+
+    summary = {
+        "total_equipment": record.total_equipment,
+        "average_flowrate": record.average_flowrate,
+        "average_pressure": record.average_pressure,
+        "average_temperature": record.average_temperature,
+        "equipment_type_distribution": record.equipment_type_distribution
+    }
+
+    pdf_buffer = generate_pdf(summary)
+    return FileResponse(pdf_buffer, as_attachment=True, filename="report.pdf")
+
