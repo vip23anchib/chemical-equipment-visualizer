@@ -9,14 +9,14 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-function Charts({ summary }) {
+export default function Charts({ summary }) {
   if (!summary) return null;
 
   const labels = Object.keys(summary.equipment_type_distribution);
   const values = Object.values(summary.equipment_type_distribution);
 
   const data = {
-    labels: labels,
+    labels,
     datasets: [
       {
         label: "Equipment Count",
@@ -39,8 +39,3 @@ function Charts({ summary }) {
     </div>
   );
 }
-
-export default function Charts() {
-  return <div>...</div>;
-}
-

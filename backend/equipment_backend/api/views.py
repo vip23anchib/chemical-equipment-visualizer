@@ -23,7 +23,7 @@ def health_check(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+
 def upload_csv(request):
     if 'file' not in request.FILES:
         return Response(
