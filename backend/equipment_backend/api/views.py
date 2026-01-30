@@ -8,8 +8,9 @@ import pandas as pd
 
 from .models import UploadRecord
 
-# Protect API and modify decorators
+# Protect API and modify decorators to require authentication
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def health_check(request):
     return Response({
         "status": "ok",
