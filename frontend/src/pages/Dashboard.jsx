@@ -15,8 +15,10 @@ export default function Dashboard() {
       const data = await uploadCSV(file);
       setSummary(data);
     } catch (err) {
-      alert("Upload failed");
-    }
+  console.error("UPLOAD ERROR:", err);
+  alert("Upload failed — check console");
+}
+
   }
 
 
