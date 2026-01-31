@@ -81,7 +81,7 @@ def upload_csv(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
 def upload_history(request):
     records = UploadRecord.objects.order_by('-uploaded_at')[:5]
 
@@ -101,7 +101,7 @@ def upload_history(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+
 def download_pdf(request):
     record = UploadRecord.objects.order_by('-uploaded_at').first()
 

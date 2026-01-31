@@ -1,8 +1,6 @@
+import History from "../components/History";
 import Charts from "../components/Charts";
-
-
 import { useState } from "react";
-
 import UploadBox from "../components/UploadBox";
 import SummaryCards from "../components/SummaryCards";
 import { uploadCSV } from "../services/api";
@@ -22,32 +20,31 @@ export default function Dashboard() {
   }
 }
 
-
 return (
   <div className="dashboard">
 
-    <header className="dashboard-header">
-      <h1>Chemical Equipment Visualizer</h1>
-      <p>Upload equipment CSV files to analyze plant performance</p>
-    </header>
+    {/* Upload */}
+    <UploadBox onUpload={handleUpload} />
 
-    <section className="upload-section">
-      <UploadBox onUpload={handleUpload} />
-    </section>
-
+    {/* Summary */}
     {summary && (
-      <>
-        <section className="summary-section fade-in">
-          <SummaryCards summary={summary} />
-        </section>
-
-        <section className="charts-section fade-in delay">
-          <Charts summary={summary} />
-        </section>
-      </>
+      <div className="fade-in">
+        <SummaryCards summary={summary} />
+      </div>
     )}
+
+    {/* Charts */}
+    {summary && (
+      <div className="fade-in delay">
+        <Charts summary={summary} />
+      </div>
+    )}
+
+    {/* 🔥 THIS WAS MISSING */}
+    <History />
 
   </div>
 );
+
 
 }

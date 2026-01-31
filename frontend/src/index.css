@@ -228,3 +228,30 @@ code {
   color: #9ca3af;
   text-align: left;
 }
+
+
+.history {
+  margin-top: 40px;
+}
+
+.history table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.history th,
+.history td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.history th {
+  color: #7dd3fc;
+  font-weight: 600;
+}
+
+.history tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
