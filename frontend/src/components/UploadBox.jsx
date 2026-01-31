@@ -1,39 +1,35 @@
-import { useState } from "react";
-
-export default function UploadBox({ onUpload }) {
+function UploadBox({ onUpload }) {
   const [file, setFile] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [drag, setDrag] = useState(false);
 
-  async function handleSubmit(e) {
+  function handleDrop(e) {
     e.preventDefault();
-
-    if (!file) {
-      alert("Please select a CSV file");
-      return;
-    }
-
-    setLoading(true);
-    await onUpload(file);
-    setLoading(false);
+    setDrag(false);
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile) setFile(droppedFile);
   }
 
   return (
-    <div className="card">
-      <h3>Upload Equipment CSV</h3>
+    <div
+      className={`upload-box ${drag ? "drag" : ""}`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDrag(true);
+      }}
+      onDragLeave={() => setDrag(false)}
+      onDrop={handleDrop}
+    >
+      <p>{file ? file.name : "Drag & drop CSV here or click to browse"}</p>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => setFile(e.target.files[0])}
-        />
+      <input
+        type="file"
+        accept=".csv"
+        onChange={(e) => setFile(e.target.files[0])}
+      />
 
-        <br /><br />
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Uploading..." : "Upload & Analyze"}
-        </button>
-      </form>
+      <button onClick={() => onUpload(file)}>
+        Upload & Analyze
+      </button>
     </div>
   );
 }

@@ -8,29 +8,55 @@ import SummaryCards from "../components/SummaryCards";
 import { uploadCSV } from "../services/api";
 
 export default function Dashboard() {
+    const [progress, setProgress] = useState(0);
+
   const [summary, setSummary] = useState(null);
 
   async function handleUpload(file) {
-    try {
-      const data = await uploadCSV(file);
-      setSummary(data);
-    } catch (err) {
-  console.error("UPLOAD ERROR:", err);
-  alert("Upload failed — check console");
-}
-
+  try {
+    setProgress(0);
+    const data = await uploadCSV(file, setProgress);
+    setSummary(data);
+  } catch (err) {
+    alert("Upload failed");
   }
+}
 
 
 return (
-  <div>
+  <div className="app-container">
     <h1>Chemical Equipment Visualizer</h1>
+    <p className="subtitle">
+      Upload equipment CSV files to analyze plant performance
+    </p>
 
-    <UploadBox onUpload={handleUpload} />
+    <div className="card">
+      <UploadBox onUpload={handleUpload} />
+    </div>
 
-    {summary && <SummaryCards summary={summary} />}
+    {progress > 0 && progress < 100 && (
+  <div className="progress-bar">
+    <div
+      className="progress-fill"
+      style={{ width: `${progress}%` }}
+    />
+    <span>{progress}%</span>
+  </div>
+)}
 
-    {summary && <Charts summary={summary} />}
+
+    {summary && (
+  <div className="fade-in">
+    <SummaryCards summary={summary} />
+  </div>
+)}
+
+{summary && (
+  <div className="fade-in delay">
+    <Charts summary={summary} />
+  </div>
+)}
+
   </div>
 );
 }

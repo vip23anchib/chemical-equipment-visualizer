@@ -1,18 +1,29 @@
-const API_BASE = "http://127.0.0.1:8000/api";
-
-export async function uploadCSV(file) {
+export async function uploadCSV(file, onProgress) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${API_BASE}/upload/`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", "http://127.0.0.1:8000/api/upload/");
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        onProgress(percent);
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        resolve(JSON.parse(xhr.response));
+      } else {
+        reject("Upload failed");
+      }
+    };
+
+    xhr.onerror = () => reject("Network error");
+
+    xhr.send(formData);
   });
-
-  if (!response.ok) {
-    throw new Error("Upload failed");
-  }
-
-  return response.json();
 }
