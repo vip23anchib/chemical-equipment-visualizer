@@ -1,35 +1,51 @@
-function UploadBox({ onUpload }) {
-  const [file, setFile] = useState(null);
-  const [drag, setDrag] = useState(false);
+import { useState } from "react";
 
-  function handleDrop(e) {
+export default function UploadBox({ onUpload }) {
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setDrag(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) setFile(droppedFile);
-  }
+    if (!file) return;
+
+    setLoading(true);
+    await onUpload(file);
+    setLoading(false);
+  };
 
   return (
+  <div className="upload-card">
+    <h3>Upload Equipment CSV</h3>
+
     <div
-      className={`upload-box ${drag ? "drag" : ""}`}
-      onDragOver={(e) => {
+      className="drop-zone"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
         e.preventDefault();
-        setDrag(true);
+        setFile(e.dataTransfer.files[0]);
       }}
-      onDragLeave={() => setDrag(false)}
-      onDrop={handleDrop}
     >
-      <p>{file ? file.name : "Drag & drop CSV here or click to browse"}</p>
+      {file ? (
+        <p>{file.name}</p>
+      ) : (
+        <p>Drag & drop CSV here or click to browse</p>
+      )}
 
       <input
         type="file"
         accept=".csv"
         onChange={(e) => setFile(e.target.files[0])}
+        hidden
+        id="fileInput"
       />
-
-      <button onClick={() => onUpload(file)}>
-        Upload & Analyze
-      </button>
     </div>
-  );
+
+    {loading && <div className="progress-bar" />}
+
+    <button onClick={handleSubmit} disabled={loading || !file}>
+      {loading ? "Uploading..." : "Upload & Analyze"}
+    </button>
+  </div>
+);
+
 }

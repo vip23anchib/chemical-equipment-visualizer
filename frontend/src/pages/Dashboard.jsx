@@ -24,39 +24,30 @@ export default function Dashboard() {
 
 
 return (
-  <div className="app-container">
-    <h1>Chemical Equipment Visualizer</h1>
-    <p className="subtitle">
-      Upload equipment CSV files to analyze plant performance
-    </p>
+  <div className="dashboard">
 
-    <div className="card">
+    <header className="dashboard-header">
+      <h1>Chemical Equipment Visualizer</h1>
+      <p>Upload equipment CSV files to analyze plant performance</p>
+    </header>
+
+    <section className="upload-section">
       <UploadBox onUpload={handleUpload} />
-    </div>
-
-    {progress > 0 && progress < 100 && (
-  <div className="progress-bar">
-    <div
-      className="progress-fill"
-      style={{ width: `${progress}%` }}
-    />
-    <span>{progress}%</span>
-  </div>
-)}
-
+    </section>
 
     {summary && (
-  <div className="fade-in">
-    <SummaryCards summary={summary} />
-  </div>
-)}
+      <>
+        <section className="summary-section fade-in">
+          <SummaryCards summary={summary} />
+        </section>
 
-{summary && (
-  <div className="fade-in delay">
-    <Charts summary={summary} />
-  </div>
-)}
+        <section className="charts-section fade-in delay">
+          <Charts summary={summary} />
+        </section>
+      </>
+    )}
 
   </div>
 );
+
 }

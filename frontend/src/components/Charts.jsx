@@ -33,9 +33,10 @@ export default function Charts({ summary }) {
   };
 
   return (
-    <div style={{ width: "400px", marginTop: "30px" }}>
-      <h3>Equipment Type Distribution</h3>
-      <Pie data={data} />
-    </div>
-  );
+  <div className="chart-wrapper">
+    <h3>Equipment Type Distribution</h3>
+    <Pie data={data} />
+  </div>
+);
+
 }
