@@ -23,22 +23,28 @@ export default function Dashboard() {
 return (
   <div className="dashboard">
 
+    <section className="dashboard-section">
     {/* Upload */}
     <UploadBox onUpload={handleUpload} />
+    </section>
 
+    <section className="dashboard-section">
     {/* Summary */}
     {summary && (
       <div className="fade-in">
         <SummaryCards summary={summary} />
       </div>
     )}
+    </section>
 
+    <section className="dashboard-section">
     {/* Charts */}
     {summary && (
       <div className="fade-in delay">
         <Charts summary={summary} />
       </div>
     )}
+    </section>
 
     {/* 🔥 THIS WAS MISSING */}
     <History />
