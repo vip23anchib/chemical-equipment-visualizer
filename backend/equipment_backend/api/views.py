@@ -10,7 +10,7 @@ from .pdf_utils import generate_pdf
 
 import pandas as pd
 
-from .models import UploadRecord
+from .models import UploadRecord, Equipment
 
 # Protect API and modify decorators to require authentication
 @api_view(['GET'])
@@ -55,22 +55,48 @@ def upload_csv(request):
             status=400
         )
 
+    # Create equipment list from dataframe
+    equipment_list = []
+    for _, row in df.iterrows():
+        equipment_list.append({
+            "name": row['Equipment Name'],
+            "type": row['Type'],
+            "flowrate": float(row['Flowrate']),
+            "pressure": float(row['Pressure']),
+            "temperature": float(row['Temperature'])
+        })
+
     summary = {
         "total_equipment": int(len(df)),
         "average_flowrate": round(df['Flowrate'].mean(), 2),
         "average_pressure": round(df['Pressure'].mean(), 2),
         "average_temperature": round(df['Temperature'].mean(), 2),
-        "equipment_type_distribution": df['Type'].value_counts().to_dict()
+        "equipment_type_distribution": df['Type'].value_counts().to_dict(),
+        "equipment": equipment_list
     }
 
     # Save to database
-    UploadRecord.objects.create(
+    # Save to database
+    record = UploadRecord.objects.create(
         total_equipment=summary["total_equipment"],
         average_flowrate=summary["average_flowrate"],
         average_pressure=summary["average_pressure"],
         average_temperature=summary["average_temperature"],
-        equipment_type_distribution=summary["equipment_type_distribution"]
+        equipment_type_distribution=summary["equipment_type_distribution"],
+        # filename could be added if model supported it, but sticking to existing schema for now
     )
+
+    # Save individual equipment data
+    Equipment.objects.bulk_create([
+        Equipment(
+            upload_record=record,
+            name=eq['name'],
+            type=eq['type'],
+            flowrate=eq['flowrate'],
+            pressure=eq['pressure'],
+            temperature=eq['temperature']
+        ) for eq in equipment_list
+    ])
 
     # Keep only last 5 uploads
     if UploadRecord.objects.count() > 5:
@@ -88,6 +114,7 @@ def upload_history(request):
     data = []
     for record in records:
         data.append({
+            "id": record.id,
             "uploaded_at": record.uploaded_at,
             "total_equipment": record.total_equipment,
             "average_flowrate": record.average_flowrate,
@@ -101,9 +128,43 @@ def upload_history(request):
 
 
 @api_view(['GET'])
+def get_summary(request, session_id):
+    try:
+        record = UploadRecord.objects.get(id=session_id)
+    except UploadRecord.DoesNotExist:
+        return Response({"error": "Session not found"}, status=404)
+    
+    summary = {
+        "id": record.id,
+        "uploaded_at": record.uploaded_at,
+        "filename": getattr(record, 'filename', 'upload.csv'), # Handle missing filename field if any
+        "total_equipment": record.total_equipment,
+        "average_flowrate": record.average_flowrate,
+        "average_pressure": record.average_pressure,
+        "average_temperature": record.average_temperature,
+        "equipment_type_distribution": record.equipment_type_distribution,
+        "equipment": [
+            {
+                "name": eq.name,
+                "type": eq.type,
+                "flowrate": eq.flowrate,
+                "pressure": eq.pressure,
+                "temperature": eq.temperature
+            } for eq in record.equipment_list.all()
+        ]
+    }
+    return Response(summary)
 
-def download_pdf(request):
-    record = UploadRecord.objects.order_by('-uploaded_at').first()
+
+@api_view(['GET'])
+def download_pdf(request, session_id=None):
+    if session_id:
+        try:
+            record = UploadRecord.objects.get(id=session_id)
+        except UploadRecord.DoesNotExist:
+            return Response({"error": "Session not found"}, status=404)
+    else:
+        record = UploadRecord.objects.order_by('-uploaded_at').first()
 
     if not record:
         return Response({"error": "No data available"}, status=400)
@@ -117,5 +178,5 @@ def download_pdf(request):
     }
 
     pdf_buffer = generate_pdf(summary)
-    return FileResponse(pdf_buffer, as_attachment=True, filename="report.pdf")
+    return FileResponse(pdf_buffer, as_attachment=True, filename=f"report_{record.id}.pdf")
 

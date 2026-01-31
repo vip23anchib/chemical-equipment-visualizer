@@ -18,3 +18,14 @@ class UploadRecord(models.Model):
 
     def __str__(self):
         return f"Upload at {self.uploaded_at}"
+
+class Equipment(models.Model):
+    upload_record = models.ForeignKey(UploadRecord, related_name='equipment_list', on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    type = models.CharField(max_length=50)
+    flowrate = models.FloatField()
+    pressure = models.FloatField()
+    temperature = models.FloatField()
+
+    def __str__(self):
+        return f"{self.name} ({self.type})"
