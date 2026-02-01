@@ -177,6 +177,17 @@ def download_pdf(request, session_id=None):
         "equipment_type_distribution": record.equipment_type_distribution
     }
 
-    pdf_buffer = generate_pdf(summary)
+    # Fetch equipment list for the detailed table
+    equipment_list = [
+        {
+            "name": eq.name,
+            "type": eq.type,
+            "flowrate": eq.flowrate,
+            "pressure": eq.pressure,
+            "temperature": eq.temperature
+        } for eq in record.equipment_list.all()
+    ]
+
+    pdf_buffer = generate_pdf(summary, equipment_list)
     return FileResponse(pdf_buffer, as_attachment=True, filename=f"report_{record.id}.pdf")
 
