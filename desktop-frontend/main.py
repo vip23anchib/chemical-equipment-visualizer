@@ -37,7 +37,7 @@ class LoginDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Chemical Equipment Visualizer - Login")
-        self.setFixedSize(450, 400)
+        self.setFixedSize(500, 450)
         self.setModal(True)
         
         layout = QVBoxLayout(self)
@@ -49,7 +49,7 @@ class LoginDialog(QDialog):
         container.setObjectName("loginContainer")
         container_layout = QVBoxLayout(container)
         container_layout.setSpacing(20)
-        container_layout.setContentsMargins(50, 40, 50, 40)
+        container_layout.setContentsMargins(60, 50, 60, 50)
         
         # Logo/Icon area
         icon_label = QLabel("⚗️")
@@ -59,10 +59,11 @@ class LoginDialog(QDialog):
         container_layout.addWidget(icon_label)
         
         # Title
-        title = QLabel("Chemical Equipment\nVisualizer")
-        title.setFont(QFont('Segoe UI', 20, QFont.Bold))
+        title = QLabel("Chemical Equipment Visualizer")
+        title.setFont(QFont('Segoe UI', 22, QFont.Bold))
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #111827; background: transparent; line-height: 1.2;")
+        title.setStyleSheet("color: #111827; background: transparent; line-height: 1.4; margin: 5px 0;")
+        title.setWordWrap(True)
         container_layout.addWidget(title)
         
         # Subtitle
