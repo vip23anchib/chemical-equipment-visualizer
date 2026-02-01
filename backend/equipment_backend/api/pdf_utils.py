@@ -12,8 +12,8 @@ from datetime import datetime
 
 def generate_pdf(summary, equipment_list=None):
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch,
-                           leftMargin=0.75*inch, rightMargin=0.75*inch)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.4*inch, bottomMargin=0.4*inch,
+                           leftMargin=0.7*inch, rightMargin=0.7*inch)
     
     styles = getSampleStyleSheet()
     story = []
@@ -22,9 +22,9 @@ def generate_pdf(summary, equipment_list=None):
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
-        fontSize=28,
+        fontSize=26,
         textColor=colors.HexColor('#1a5490'),
-        spaceAfter=12,
+        spaceAfter=6,
         alignment=TA_CENTER,
         fontName='Helvetica-Bold'
     )
@@ -32,26 +32,26 @@ def generate_pdf(summary, equipment_list=None):
     heading_style = ParagraphStyle(
         'CustomHeading',
         parent=styles['Heading2'],
-        fontSize=14,
+        fontSize=12,
         textColor=colors.HexColor('#2c5aa0'),
-        spaceAfter=8,
-        spaceBefore=12,
+        spaceAfter=6,
+        spaceBefore=8,
         fontName='Helvetica-Bold'
     )
     
     # Title
     story.append(Paragraph("CHEMICAL EQUIPMENT ANALYSIS REPORT", title_style))
-    story.append(Spacer(1, 0.1*inch))
+    story.append(Spacer(1, 0.08*inch))
     
     # Date and time
-    date_style = ParagraphStyle('DateStyle', parent=styles['Normal'], fontSize=10, 
+    date_style = ParagraphStyle('DateStyle', parent=styles['Normal'], fontSize=9, 
                                textColor=colors.grey, alignment=TA_CENTER)
     story.append(Paragraph(f"Report Generated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", date_style))
-    story.append(Spacer(1, 0.2*inch))
+    story.append(Spacer(1, 0.15*inch))
     
     # Executive Summary Section
     story.append(Paragraph("EXECUTIVE SUMMARY", heading_style))
-    story.append(Spacer(1, 0.1*inch))
+    story.append(Spacer(1, 0.08*inch))
     
     # Summary metrics in a nice table
     summary_data = [
@@ -68,34 +68,34 @@ def generate_pdf(summary, equipment_list=None):
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f0f0f0')]),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 11),
-        ('LEFTPADDING', (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
     ]))
     story.append(summary_table)
-    story.append(Spacer(1, 0.2*inch))
+    story.append(Spacer(1, 0.12*inch))
     
     # Equipment Type Distribution Chart
     story.append(Paragraph("EQUIPMENT TYPE DISTRIBUTION", heading_style))
-    story.append(Spacer(1, 0.1*inch))
+    story.append(Spacer(1, 0.08*inch))
     
     equipment_dist = summary.get('equipment_type_distribution', {})
     if equipment_dist:
         # Create pie chart
         chart_buffer = _create_equipment_distribution_chart(equipment_dist)
         if chart_buffer:
-            img = Image(chart_buffer, width=5*inch, height=3*inch)
+            img = Image(chart_buffer, width=4.5*inch, height=2.7*inch)
             story.append(img)
     
-    story.append(Spacer(1, 0.2*inch))
+    story.append(Spacer(1, 0.1*inch))
     
     # Equipment Type Details Table
     if equipment_dist:
@@ -109,15 +109,15 @@ def generate_pdf(summary, equipment_list=None):
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 11),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f5f5f5')]),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 10),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
         ]))
         story.append(dist_table)
     
@@ -125,7 +125,7 @@ def generate_pdf(summary, equipment_list=None):
     if equipment_list and len(equipment_list) > 0:
         story.append(PageBreak())
         story.append(Paragraph("DETAILED EQUIPMENT LIST", heading_style))
-        story.append(Spacer(1, 0.1*inch))
+        story.append(Spacer(1, 0.08*inch))
         
         # Build equipment details table
         eq_data = [['Name', 'Type', 'Flowrate (L/min)', 'Pressure (bar)', 'Temp (°C)']]
@@ -145,16 +145,36 @@ def generate_pdf(summary, equipment_list=None):
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 9),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
             ('BACKGROUND', (0, 1), (-1, -1), colors.white),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f5f5f5')]),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
         ]))
         story.append(eq_table)
+    
+    # Add Notes Section at the bottom
+    story.append(Spacer(1, 0.2*inch))
+    story.append(Paragraph("NOTES", heading_style))
+    story.append(Spacer(1, 0.08*inch))
+    
+    notes_style = ParagraphStyle(
+        'NotesStyle',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.HexColor('#4a5568'),
+        leading=14
+    )
+    
+    notes_text = """
+    • This report summarizes statistics derived from the most recently uploaded CSV file.<br/>
+    • Values represent averages across all equipment records.<br/>
+    • For detailed information about specific equipment, refer to the Detailed Equipment List section.
+    """
+    story.append(Paragraph(notes_text, notes_style))
     
     # Build PDF
     doc.build(story)

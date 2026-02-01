@@ -277,7 +277,7 @@ function App() {
             </button>
             {data && (
               <button className="btn btn-primary" onClick={handleDownload}>
-                Export Report
+                Download Analysis Report
               </button>
             )}
           </div>

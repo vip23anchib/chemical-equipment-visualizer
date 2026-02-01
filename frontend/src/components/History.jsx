@@ -249,7 +249,7 @@ export default function History() {
             className="btn-primary flex items-center gap-2"
           >
             <Download className="w-4 h-4" />
-            Export Report
+            Download Analysis Report
           </button>
         )}
       </div>

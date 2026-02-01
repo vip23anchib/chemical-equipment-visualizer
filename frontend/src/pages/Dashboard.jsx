@@ -44,6 +44,9 @@ export default function Dashboard() {
             {/* Summary Cards */}
             {summary && (
               <section className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
+                <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <p className="text-sm text-blue-300">ℹ️ Data shown below is derived from the last uploaded CSV file.</p>
+                </div>
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-lg font-semibold text-white">Analysis Summary</h3>
