@@ -395,7 +395,7 @@ function App() {
                 <div className="charts-grid">
                   <div className="card">
                     <div className="card-header">
-                      <h3 className="card-title">Average Metrics</h3>
+                      <h3 className="card-title">Average Process Parameters</h3>
                     </div>
                     <div className="card-body">
                       <div className="chart-container">
@@ -405,7 +405,7 @@ function App() {
                   </div>
                   <div className="card">
                     <div className="card-header">
-                      <h3 className="card-title">Equipment Distribution</h3>
+                      <h3 className="card-title">Equipment Type Distribution</h3>
                     </div>
                     <div className="card-body">
                       <div className="chart-container">

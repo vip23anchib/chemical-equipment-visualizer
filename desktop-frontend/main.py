@@ -297,36 +297,53 @@ class ChemicalVisualizerApp(QMainWindow):
         top_layout = QHBoxLayout(top_widget)
         top_layout.setSpacing(15)
 
-        # Summary section
+        # Summary section - Use a grid for better layout
         summary_group = QGroupBox("📊 Summary Statistics")
+        summary_group.setMinimumWidth(300)
+        summary_group.setMaximumWidth(350)
         summary_layout = QVBoxLayout(summary_group)
+        summary_layout.setSpacing(10)
+        summary_layout.setContentsMargins(15, 15, 15, 15)
         
         self.stats_labels = {}
-        stats = ['Total Equipment', 'Avg Flowrate', 'Avg Pressure', 'Avg Temperature']
-        for stat in stats:
+        # Display: Value on first line, then label and unit on subsequent lines
+        stats = [
+            ('Total Equipment', 'items'),
+            ('Avg Flowrate', 'm³/h'),
+            ('Avg Pressure', 'bar'),
+            ('Avg Temperature', '°C')
+        ]
+        for stat_name, unit in stats:
             frame = QFrame()
-            frame.setStyleSheet("background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;")
+            frame.setStyleSheet("background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px;")
+            frame.setMinimumHeight(80)
             frame_layout = QVBoxLayout(frame)
-            frame_layout.setContentsMargins(10, 10, 10, 10)
+            frame_layout.setContentsMargins(12, 10, 12, 10)
+            frame_layout.setSpacing(3)
             
             value_label = QLabel("--")
-            value_label.setFont(QFont('Arial', 20, QFont.Bold))
+            value_label.setFont(QFont('Arial', 22, QFont.Bold))
             value_label.setStyleSheet("color: #2563eb;")
             value_label.setAlignment(Qt.AlignCenter)
             
-            name_label = QLabel(stat)
-            name_label.setFont(QFont('Arial', 10))
-            name_label.setStyleSheet("color: #4b5563;")
+            name_label = QLabel(stat_name)
+            name_label.setFont(QFont('Arial', 10, QFont.Bold))
+            name_label.setStyleSheet("color: #1f2937;")
             name_label.setAlignment(Qt.AlignCenter)
+            
+            unit_label = QLabel(f"[{unit}]")
+            unit_label.setFont(QFont('Arial', 8))
+            unit_label.setStyleSheet("color: #9ca3af;")
+            unit_label.setAlignment(Qt.AlignCenter)
             
             frame_layout.addWidget(value_label)
             frame_layout.addWidget(name_label)
+            frame_layout.addWidget(unit_label)
             summary_layout.addWidget(frame)
             
-            self.stats_labels[stat] = value_label
+            self.stats_labels[stat_name] = value_label
         
         summary_layout.addStretch()
-        summary_group.setFixedWidth(200)
         top_layout.addWidget(summary_group)
 
         # Charts section
@@ -335,16 +352,16 @@ class ChemicalVisualizerApp(QMainWindow):
         charts_layout.setSpacing(15)
 
         # Bar chart
-        bar_group = QGroupBox("📈 Average Values")
+        bar_group = QGroupBox("📈 Average Process Parameters")
         bar_layout = QVBoxLayout(bar_group)
         self.bar_canvas = MplCanvas(self, width=5, height=4)
         bar_layout.addWidget(self.bar_canvas)
         charts_layout.addWidget(bar_group)
 
         # Pie chart
-        pie_group = QGroupBox("🥧 Equipment Distribution")
+        pie_group = QGroupBox("🥧 Equipment Type Distribution")
         pie_layout = QVBoxLayout(pie_group)
-        self.pie_canvas = MplCanvas(self, width=5, height=4)
+        self.pie_canvas = MplCanvas(self, width=6, height=5)
         pie_layout.addWidget(self.pie_canvas)
         charts_layout.addWidget(pie_group)
 
@@ -357,7 +374,7 @@ class ChemicalVisualizerApp(QMainWindow):
         
         self.data_table = QTableWidget()
         self.data_table.setColumnCount(5)
-        self.data_table.setHorizontalHeaderLabels(['Name', 'Type', 'Flowrate', 'Pressure', 'Temperature'])
+        self.data_table.setHorizontalHeaderLabels(['Name', 'Type', 'Flowrate (m³/h)', 'Pressure (bar)', 'Temperature (°C)'])
         self.data_table.horizontalHeader().setStretchLastSection(True)
         table_layout.addWidget(self.data_table)
         
@@ -533,16 +550,35 @@ class ChemicalVisualizerApp(QMainWindow):
         
         # Bar Chart
         self.bar_canvas.axes.clear()
-        categories = ['Flowrate', 'Pressure', 'Temperature']
+        categories = ['Flowrate\n(m³/h)', 'Pressure\n(bar)', 'Temperature\n(°C)']
         values = [data['average_flowrate'], data['average_pressure'], data['average_temperature']]
         self.bar_canvas.axes.bar(categories, values, color=['#2563eb', '#059669', '#d97706'])
+        self.bar_canvas.axes.set_ylabel('Value', fontsize=10)
+        self.bar_canvas.axes.set_title('Average Process Parameters', fontsize=11, fontweight='bold')
         self.bar_canvas.draw()
         
         # Pie Chart
         self.pie_canvas.axes.clear()
         dist = data['equipment_type_distribution']
         if dist:
-            self.pie_canvas.axes.pie(dist.values(), labels=dist.keys(), autopct='%1.1f%%')
+            # Use legend instead of labels around pie to avoid truncation
+            wedges, texts, autotexts = self.pie_canvas.axes.pie(
+                dist.values(), 
+                labels=None,  # Don't use labels around pie
+                autopct='%1.1f%%',
+                startangle=90,
+                textprops={'fontsize': 9}
+            )
+            # Add legend with full equipment names
+            self.pie_canvas.axes.legend(
+                dist.keys(), 
+                loc='center left', 
+                bbox_to_anchor=(1, 0, 0.5, 1),
+                fontsize=9,
+                frameon=True
+            )
+            self.pie_canvas.axes.set_title('Equipment Type Distribution', fontsize=9, fontweight='bold', pad=10)
+        self.pie_canvas.figure.tight_layout()
         self.pie_canvas.draw()
         
         # Table
