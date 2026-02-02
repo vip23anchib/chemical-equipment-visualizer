@@ -9,6 +9,7 @@ import { Download, FileText, Clock, BarChart3, Sparkles, Shield, Zap } from "luc
 
 export default function Dashboard() {
   const [summary, setSummary] = useState(null);
+  const [warnings, setWarnings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeNav, setActiveNav] = useState("dashboard");
 
@@ -19,6 +20,26 @@ export default function Dashboard() {
       const data = await uploadCSV(file, () => { });
       console.log("Upload successful:", data);
       setSummary(data);
+      
+      // Extract and store validation warnings
+      const validationWarnings = data.validation_warnings || [];
+      setWarnings(validationWarnings);
+      
+      // Show alert if warnings exist
+      if (validationWarnings && validationWarnings.length > 0) {
+        let warningText = "⚠️ Data Validation Warnings:\n\n";
+        validationWarnings.forEach(warning => {
+          warningText += `${warning.message}\n`;
+          warning.details.slice(0, 2).forEach(detail => {
+            warningText += `  • ${detail}\n`;
+          });
+          if (warning.details.length > 2) {
+            warningText += `  ... and ${warning.details.length - 2} more\n`;
+          }
+          warningText += "\n";
+        });
+        alert(warningText);
+      }
     } catch (err) {
       console.error("Upload failed:", err);
       alert("Upload failed: " + err);
@@ -60,7 +81,7 @@ export default function Dashboard() {
                     Download Report
                   </button>
                 </div>
-                <SummaryCards summary={summary} />
+                <SummaryCards summary={summary} warnings={warnings} />
               </section>
             )}
 
