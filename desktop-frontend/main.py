@@ -153,7 +153,7 @@ class LoginDialog(QDialog):
         password = self.password_input.text()
         
         if not username or not password:
-            QMessageBox.warning(self, "Error", "Please enter both username and password")
+            QMessageBox.warning(self, "Input Required", "Please enter both username and password")
             return
         
         # Test authentication
@@ -168,19 +168,26 @@ class LoginDialog(QDialog):
                 auth_credentials = HTTPBasicAuth(username, password)
                 self.accept()
             elif response.status_code == 401:
-                QMessageBox.warning(self, "Login Failed", "Invalid username or password")
+                QMessageBox.warning(self, "Login Failed", "Invalid username or password. Please try again.")
             else:
-                 # If server isn't enforcing auth, it might return 200 even with bad coords?
-                 # But we just added REST_FRAMEWORK settings, so it should enforce.
-                 # If it returns 200, assume auth worked or wasn't needed (but we want to store it anyway)
-                 auth_credentials = HTTPBasicAuth(username, password)
-                 self.accept()
+                # If server isn't enforcing auth, accept anyway
+                auth_credentials = HTTPBasicAuth(username, password)
+                self.accept()
                  
         except requests.exceptions.ConnectionError:
             QMessageBox.critical(self, "Connection Error", 
-                "Cannot connect to server.\nMake sure the Django backend is running on localhost:8000")
+                "Cannot connect to the backend server.\n\n"
+                "Make sure the Django server is running:\n"
+                "cd backend/equipment_backend\n"
+                "python manage.py runserver")
+        except requests.exceptions.Timeout:
+            QMessageBox.critical(self, "Connection Timeout", 
+                "Server took too long to respond.\n"
+                "Please ensure the backend is running and try again.")
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Login failed: {str(e)}")
+            QMessageBox.critical(self, "Login Error", 
+                f"An error occurred during login:\n{str(e)[:100]}\n\n"
+                "Please ensure the backend is running.")
 
 
 class APIWorker(QThread):
@@ -458,11 +465,34 @@ class ChemicalVisualizerApp(QMainWindow):
         self.status_bar.showMessage("Uploading file...")
         
         def do_upload():
-            with open(file_path, 'rb') as f:
-                files = {'file': (file_path.split('/')[-1], f)}
-                response = requests.post(f"{API_BASE_URL}/upload/", files=files, auth=auth_credentials)
-                response.raise_for_status()
-                return response.json()
+            try:
+                with open(file_path, 'rb') as f:
+                    files = {'file': (file_path.split('/')[-1], f)}
+                    response = requests.post(
+                        f"{API_BASE_URL}/upload/", 
+                        files=files, 
+                        auth=auth_credentials,
+                        timeout=30
+                    )
+                    response.raise_for_status()
+                    
+                    data = response.json()
+                    
+                    # Check for empty dataset
+                    if not data or data.get('total_equipment', 0) == 0:
+                        raise ValueError("CSV file is empty or contains no valid equipment records")
+                    
+                    return data
+            except requests.exceptions.ConnectionError:
+                raise Exception("Cannot connect to backend. Ensure the Django server is running on localhost:8000")
+            except requests.exceptions.Timeout:
+                raise Exception("Backend connection timed out. Server may be unresponsive.")
+            except requests.exceptions.RequestException as e:
+                raise Exception(f"Backend request failed: {str(e)}")
+            except ValueError as e:
+                raise Exception(str(e))
+            except Exception as e:
+                raise Exception(f"Upload failed: {str(e)}")
         
         worker = APIWorker(do_upload)
         worker.finished.connect(self.on_upload_success)
@@ -487,15 +517,42 @@ class ChemicalVisualizerApp(QMainWindow):
 
     def load_history(self):
         def fetch():
-            response = requests.get(f"{API_BASE_URL}/history/", auth=auth_credentials)
-            response.raise_for_status()
-            return response.json()
+            try:
+                response = requests.get(
+                    f"{API_BASE_URL}/history/",
+                    auth=auth_credentials,
+                    timeout=10
+                )
+                response.raise_for_status()
+                
+                data = response.json()
+                
+                # Validate response is a list and not empty
+                if not isinstance(data, list):
+                    raise ValueError("Invalid history format from server")
+                
+                return data if data else []
+            except requests.exceptions.ConnectionError:
+                raise Exception("Cannot reach backend. Is the Django server running?")
+            except requests.exceptions.Timeout:
+                raise Exception("Request timed out. Backend is not responding.")
+            except requests.exceptions.RequestException as e:
+                raise Exception(f"Failed to fetch history: {str(e)}")
+            except ValueError as e:
+                raise Exception(str(e))
         
         worker = APIWorker(fetch)
         worker.finished.connect(self.on_history_loaded)
-        worker.error.connect(lambda e: self.status_bar.showMessage(f"Failed to load history: {e}"))
+        worker.error.connect(self.on_history_load_error)
         self.workers.append(worker)
         worker.start()
+
+    def on_history_load_error(self, error):
+        """Handle history loading errors gracefully."""
+        self.status_bar.showMessage("Could not load history")
+        # Show non-blocking warning instead of blocking dialog
+        QMessageBox.warning(self, "History Load Failed", f"{error}\n\nYou can continue using the app.")
+        # Keep history as empty, app continues running
 
     def on_history_loaded(self, data):
         self.history = data
@@ -523,15 +580,45 @@ class ChemicalVisualizerApp(QMainWindow):
     def load_session(self, session_id):
         self.status_bar.showMessage("Loading session data...")
         def fetch():
-            response = requests.get(f"{API_BASE_URL}/summary/{session_id}/", auth=auth_credentials)
-            response.raise_for_status()
-            return response.json()
+            try:
+                response = requests.get(
+                    f"{API_BASE_URL}/summary/{session_id}/",
+                    auth=auth_credentials,
+                    timeout=10
+                )
+                response.raise_for_status()
+                
+                data = response.json()
+                
+                # Validate essential fields exist
+                required_fields = ['total_equipment', 'average_flowrate', 'average_pressure', 'average_temperature']
+                for field in required_fields:
+                    if field not in data:
+                        raise ValueError(f"Missing required field: {field}")
+                
+                return data
+            except requests.exceptions.ConnectionError:
+                raise Exception("Cannot connect to backend.")
+            except requests.exceptions.Timeout:
+                raise Exception("Session load timed out.")
+            except requests.exceptions.RequestException as e:
+                raise Exception(f"Failed to load session: {str(e)}")
+            except ValueError as e:
+                raise Exception(str(e))
         
         worker = APIWorker(fetch)
         worker.finished.connect(self.on_session_loaded)
-        worker.error.connect(lambda e: self.status_bar.showMessage(f"Failed to load session: {e}"))
+        worker.error.connect(self.on_session_load_error)
         self.workers.append(worker)
         worker.start()
+
+    def on_session_load_error(self, error):
+        """Handle session loading errors gracefully."""
+        self.status_bar.showMessage("Could not load session")
+        QMessageBox.warning(self, "Session Load Failed", f"{error}\n\nPlease try again or select another upload.")
+        self.session_data = None
+        self.download_btn.setEnabled(False)
+        self.clear_display()
 
     def on_session_loaded(self, data):
         self.session_data = data
@@ -540,73 +627,163 @@ class ChemicalVisualizerApp(QMainWindow):
         self.update_display()
 
     def update_display(self):
-        if not self.session_data: return
+        if not self.session_data: 
+            self.clear_display()
+            return
+        
         data = self.session_data
         
-        self.stats_labels['Total Equipment'].setText(str(data['total_equipment']))
-        self.stats_labels['Avg Flowrate'].setText(f"{data['average_flowrate']:.1f}")
-        self.stats_labels['Avg Pressure'].setText(f"{data['average_pressure']:.1f}")
-        self.stats_labels['Avg Temperature'].setText(f"{data['average_temperature']:.1f}")
+        try:
+            # Safely convert values to float, handle invalid/missing data
+            def safe_float(value, default=0.0):
+                """Convert value to float safely, return default if invalid."""
+                try:
+                    if value is None:
+                        return default
+                    f = float(value)
+                    # Check for NaN or Inf
+                    if f != f or f == float('inf') or f == float('-inf'):
+                        return default
+                    return f
+                except (ValueError, TypeError):
+                    return default
+            
+            # Update stats with safe conversion
+            total_eq = data.get('total_equipment', 0)
+            if total_eq <= 0:
+                self.stats_labels['Total Equipment'].setText("0")
+                self.status_bar.showMessage("No equipment data available")
+                return
+            
+            self.stats_labels['Total Equipment'].setText(str(int(total_eq)))
+            self.stats_labels['Avg Flowrate'].setText(f"{safe_float(data.get('average_flowrate'), 0.0):.1f}")
+            self.stats_labels['Avg Pressure'].setText(f"{safe_float(data.get('average_pressure'), 0.0):.1f}")
+            self.stats_labels['Avg Temperature'].setText(f"{safe_float(data.get('average_temperature'), 0.0):.1f}")
+            
+            # Bar Chart
+            self.bar_canvas.axes.clear()
+            categories = ['Flowrate\n(m³/h)', 'Pressure\n(bar)', 'Temperature\n(°C)']
+            values = [
+                safe_float(data.get('average_flowrate'), 0.0),
+                safe_float(data.get('average_pressure'), 0.0),
+                safe_float(data.get('average_temperature'), 0.0)
+            ]
+            self.bar_canvas.axes.bar(categories, values, color=['#2563eb', '#059669', '#d97706'])
+            self.bar_canvas.axes.set_ylabel('Value', fontsize=10)
+            self.bar_canvas.axes.set_title('Average Process Parameters', fontsize=11, fontweight='bold')
+            self.bar_canvas.draw()
+            
+            # Pie Chart
+            self.pie_canvas.axes.clear()
+            dist = data.get('equipment_type_distribution', {})
+            if dist and isinstance(dist, dict) and len(dist) > 0:
+                # Filter out invalid values
+                valid_dist = {k: safe_float(v, 0.0) for k, v in dist.items()}
+                valid_dist = {k: v for k, v in valid_dist.items() if v > 0}
+                
+                if valid_dist:
+                    wedges, texts, autotexts = self.pie_canvas.axes.pie(
+                        valid_dist.values(), 
+                        labels=None,
+                        autopct='%1.1f%%',
+                        startangle=90,
+                        textprops={'fontsize': 9}
+                    )
+                    self.pie_canvas.axes.legend(
+                        valid_dist.keys(), 
+                        loc='center left', 
+                        bbox_to_anchor=(1, 0, 0.5, 1),
+                        fontsize=9,
+                        frameon=True
+                    )
+                    self.pie_canvas.axes.set_title('Equipment Type Distribution', fontsize=9, fontweight='bold', pad=10)
+                else:
+                    self.pie_canvas.axes.text(0.5, 0.5, 'No valid distribution data', 
+                                            ha='center', va='center', fontsize=10)
+            else:
+                self.pie_canvas.axes.text(0.5, 0.5, 'No type distribution available', 
+                                        ha='center', va='center', fontsize=10)
+            self.pie_canvas.figure.tight_layout()
+            self.pie_canvas.draw()
+            
+            # Table - skip invalid rows
+            equipment = data.get('equipment', [])
+            if isinstance(equipment, list):
+                valid_equipment = []
+                for eq in equipment:
+                    # Only add if it has a name
+                    if eq.get('name'):
+                        valid_equipment.append(eq)
+                
+                self.data_table.setRowCount(len(valid_equipment))
+                for r, eq in enumerate(valid_equipment):
+                    self.data_table.setItem(r, 0, QTableWidgetItem(str(eq.get('name', 'N/A'))))
+                    self.data_table.setItem(r, 1, QTableWidgetItem(str(eq.get('type', 'N/A'))))
+                    self.data_table.setItem(r, 2, QTableWidgetItem(f"{safe_float(eq.get('flowrate', 0), 0.0):.2f}"))
+                    self.data_table.setItem(r, 3, QTableWidgetItem(f"{safe_float(eq.get('pressure', 0), 0.0):.2f}"))
+                    self.data_table.setItem(r, 4, QTableWidgetItem(f"{safe_float(eq.get('temperature', 0), 0.0):.2f}"))
+            else:
+                self.data_table.setRowCount(0)
+            
+            self.status_bar.showMessage(f"Displaying {total_eq} equipment items")
         
-        # Bar Chart
+        except Exception as e:
+            # Catch any unexpected errors in display logic
+            self.clear_display()
+            self.status_bar.showMessage("Error displaying data")
+            QMessageBox.warning(self, "Display Error", f"Could not display all data:\n{str(e)[:100]}")
+
+    def clear_display(self):
+        """Clear all display elements."""
+        for label in self.stats_labels.values():
+            label.setText("--")
         self.bar_canvas.axes.clear()
-        categories = ['Flowrate\n(m³/h)', 'Pressure\n(bar)', 'Temperature\n(°C)']
-        values = [data['average_flowrate'], data['average_pressure'], data['average_temperature']]
-        self.bar_canvas.axes.bar(categories, values, color=['#2563eb', '#059669', '#d97706'])
-        self.bar_canvas.axes.set_ylabel('Value', fontsize=10)
-        self.bar_canvas.axes.set_title('Average Process Parameters', fontsize=11, fontweight='bold')
         self.bar_canvas.draw()
-        
-        # Pie Chart
         self.pie_canvas.axes.clear()
-        dist = data['equipment_type_distribution']
-        if dist:
-            # Use legend instead of labels around pie to avoid truncation
-            wedges, texts, autotexts = self.pie_canvas.axes.pie(
-                dist.values(), 
-                labels=None,  # Don't use labels around pie
-                autopct='%1.1f%%',
-                startangle=90,
-                textprops={'fontsize': 9}
-            )
-            # Add legend with full equipment names
-            self.pie_canvas.axes.legend(
-                dist.keys(), 
-                loc='center left', 
-                bbox_to_anchor=(1, 0, 0.5, 1),
-                fontsize=9,
-                frameon=True
-            )
-            self.pie_canvas.axes.set_title('Equipment Type Distribution', fontsize=9, fontweight='bold', pad=10)
-        self.pie_canvas.figure.tight_layout()
         self.pie_canvas.draw()
-        
-        # Table
-        equipment = data.get('equipment', [])
-        self.data_table.setRowCount(len(equipment))
-        for r, eq in enumerate(equipment):
-            self.data_table.setItem(r, 0, QTableWidgetItem(str(eq.get('name', ''))))
-            self.data_table.setItem(r, 1, QTableWidgetItem(str(eq.get('type', ''))))
-            self.data_table.setItem(r, 2, QTableWidgetItem(str(eq.get('flowrate', 0))))
-            self.data_table.setItem(r, 3, QTableWidgetItem(str(eq.get('pressure', 0))))
-            self.data_table.setItem(r, 4, QTableWidgetItem(str(eq.get('temperature', 0))))
+        self.data_table.setRowCount(0)
 
     def download_report(self):
-        if not self.session_data: return
+        if not self.session_data: 
+            QMessageBox.warning(self, "No Data", "Please load a session first.")
+            return
+        
         path, _ = QFileDialog.getSaveFileName(self, "Save PDF", "report.pdf", "PDF Files (*.pdf)")
         if not path: return
         
         def download():
-            # Use specific report ID if we have session ID
-            url = f"{API_BASE_URL}/report/{self.session_data.get('id', '')}/"
-            res = requests.get(url, auth=auth_credentials)
-            res.raise_for_status()
-            with open(path, 'wb') as f: f.write(res.content)
-            return path
+            try:
+                # Use specific report ID if available
+                report_id = self.session_data.get('id', '')
+                if not report_id:
+                    raise ValueError("No session ID available for report generation")
+                
+                res = requests.get(
+                    f"{API_BASE_URL}/report/{report_id}/",
+                    auth=auth_credentials,
+                    timeout=30
+                )
+                res.raise_for_status()
+                
+                # Verify we got PDF content
+                if res.headers.get('content-type', '').startswith('application/pdf'):
+                    with open(path, 'wb') as f:
+                        f.write(res.content)
+                    return path
+                else:
+                    raise ValueError("Server returned invalid PDF content")
+            except requests.exceptions.ConnectionError:
+                raise Exception("Cannot reach backend for report generation.")
+            except requests.exceptions.Timeout:
+                raise Exception("Report download timed out.")
+            except requests.exceptions.RequestException as e:
+                raise Exception(f"Failed to download report: {str(e)}")
+            except ValueError as e:
+                raise Exception(str(e))
         
         worker = APIWorker(download)
-        worker.finished.connect(lambda p: QMessageBox.information(self, "Success", f"Saved to {p}"))
-        worker.error.connect(lambda e: QMessageBox.critical(self, "Error", str(e)))
+        worker.finished.connect(lambda p: QMessageBox.information(self, "Success", f"Report saved to:\n{p}"))
+        worker.error.connect(lambda e: QMessageBox.critical(self, "Download Failed", f"Could not download report:\n{e}"))
         self.workers.append(worker)
         worker.start()
 
