@@ -18,7 +18,7 @@ The project emphasizes clean architecture, robustness, and transparency, with a 
 
 ![Desktop Application](screenshots/desktop_app.png)
 
-### PDF Report Output (Optional)
+### Login Page- authentication
 
 ![Login Page](screenshots/login_page.png)
 
