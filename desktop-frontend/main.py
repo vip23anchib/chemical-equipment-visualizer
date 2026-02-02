@@ -516,23 +516,6 @@ class ChemicalVisualizerApp(QMainWindow):
         self.download_btn.setEnabled(True)
         self.status_bar.showMessage("Upload successful!")
         
-        # Check for validation warnings
-        warnings = data.get('validation_warnings', [])
-        if warnings:
-            # Build warning message
-            warning_text = "Data Validation Warnings:\n\n"
-            for warning in warnings:
-                warning_text += f"{warning['message']}\n"
-                # Show first 2 details as examples
-                for detail in warning['details'][:2]:
-                    warning_text += f"  - {detail}\n"
-                if len(warning['details']) > 2:
-                    warning_text += f"  ... and {len(warning['details']) - 2} more\n"
-                warning_text += "\n"
-            
-            warning_text += "Data processing will continue. Review details in the equipment table."
-            QMessageBox.warning(self, "Validation Warnings", warning_text)
-        
         self.update_display()
         self.load_history()
 
@@ -651,25 +634,7 @@ class ChemicalVisualizerApp(QMainWindow):
         self.session_data = data
         self.download_btn.setEnabled(True)
         
-        # Check for validation warnings
-        warnings = data.get('validation_warnings', [])
-        if warnings:
-            # Build warning message
-            warning_text = "Data Validation Warnings:\n\n"
-            for warning in warnings:
-                warning_text += f"{warning['message']}\n"
-                # Show first 2 details as examples
-                for detail in warning['details'][:2]:
-                    warning_text += f"  - {detail}\n"
-                if len(warning['details']) > 2:
-                    warning_text += f"  ... and {len(warning['details']) - 2} more\n"
-                warning_text += "\n"
-            
-            warning_text += "Data processing will continue. Review details in the equipment table."
-            QMessageBox.warning(self, "Validation Warnings", warning_text)
-            self.status_bar.showMessage(f"Loaded session ({len(warnings)} warning(s))")
-        else:
-            self.status_bar.showMessage("Loaded session (no warnings)")
+        self.status_bar.showMessage("Loaded session")
         
         self.update_display()
 
