@@ -1,0 +1,24 @@
+databases:
+  - name: chemical-equipment-db
+    databaseName: equipment_db
+    user: equipment_user
+    plan: free
+
+services:
+  - type: web
+    name: chemical-equipment-api
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn equipment_backend.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chemical-equipment-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.11.4"
