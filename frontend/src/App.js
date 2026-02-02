@@ -14,7 +14,7 @@ import './index.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-const API = 'http://127.0.0.1:8000/api';
+const API = 'https://chemical-equipment-api-01hg.onrender.com/api';
 
 function App() {
   const [user, setUser] = useState(null); // { username, password }

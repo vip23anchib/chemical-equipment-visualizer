@@ -140,6 +140,7 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS origins - add your frontend URLs here
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://chemical-equipment-visualizer-mu.vercel.app",
 ]
 
 # Add production frontend URL from environment

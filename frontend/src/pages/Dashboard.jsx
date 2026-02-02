@@ -28,7 +28,7 @@ export default function Dashboard() {
   }
 
   const handleDownloadReport = () => {
-    window.open("http://127.0.0.1:8000/api/download-pdf/", "_blank");
+    window.open("https://chemical-equipment-api-01hg.onrender.com/api/download-pdf/", "_blank");
   };
 
   const renderContent = () => {

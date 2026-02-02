@@ -82,7 +82,7 @@ export default function History() {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch("http://127.0.0.1:8000/api/history/")
+    fetch("https://chemical-equipment-api-01hg.onrender.com/api/history/")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -245,7 +245,7 @@ export default function History() {
 
         {history.length > 0 && (
           <button
-            onClick={() => window.open("http://127.0.0.1:8000/api/download-pdf/", "_blank")}
+            onClick={() => window.open("https://chemical-equipment-api-01hg.onrender.com/api/download-pdf/", "_blank")}
             className="btn-primary flex items-center gap-2"
           >
             <Download className="w-4 h-4" />

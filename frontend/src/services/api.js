@@ -1,3 +1,5 @@
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://chemical-equipment-api-01hg.onrender.com/api';
+
 export async function uploadCSV(file, onProgress) {
   const formData = new FormData();
   formData.append("file", file);
@@ -5,7 +7,7 @@ export async function uploadCSV(file, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
-    xhr.open("POST", "http://127.0.0.1:8000/api/upload/");
+    xhr.open("POST", `${API_BASE_URL}/upload/`);
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) {
@@ -18,22 +20,19 @@ export async function uploadCSV(file, onProgress) {
       try {
         if (xhr.status === 200) {
           const data = JSON.parse(xhr.response);
-          
-          // Validate response has required fields
+
           if (!data || typeof data !== 'object') {
             reject("Invalid response format from server");
             return;
           }
-          
-          // Check for empty dataset
+
           if (data.total_equipment === 0 || !data.total_equipment) {
             reject("CSV file is empty or contains no valid equipment records");
             return;
           }
-          
+
           resolve(data);
         } else if (xhr.status === 400) {
-          // Bad request - likely invalid CSV format
           const errorData = JSON.parse(xhr.response);
           reject(errorData.error || "Invalid CSV format or file is empty");
         } else if (xhr.status === 401 || xhr.status === 403) {
@@ -49,14 +48,14 @@ export async function uploadCSV(file, onProgress) {
     };
 
     xhr.onerror = () => {
-      reject("Network error: Cannot connect to backend. Is the server running?");
+      reject("Network error: Cannot connect to backend.");
     };
 
     xhr.ontimeout = () => {
       reject("Upload request timed out. Please try again.");
     };
 
-    xhr.timeout = 60000; // 60 second timeout
+    xhr.timeout = 60000;
     xhr.send(formData);
   });
 }
@@ -64,8 +63,8 @@ export async function uploadCSV(file, onProgress) {
 
 export async function fetchHistory() {
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/history/");
-    
+    const response = await fetch(`${API_BASE_URL}/history/`);
+
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
         throw new Error("Authentication required. Please log in.");
@@ -75,22 +74,18 @@ export async function fetchHistory() {
         throw new Error(`Failed to fetch history (${response.status})`);
       }
     }
-    
+
     const data = await response.json();
-    
-    // Validate response is an array
+
     if (!Array.isArray(data)) {
       throw new Error("Invalid history format from server");
     }
-    
-    // Return empty array if no history, don't throw
+
     return data;
   } catch (error) {
-    // If network error, provide helpful message
     if (error instanceof TypeError) {
-      throw new Error("Cannot connect to backend. Is the Django server running on port 8000?");
+      throw new Error("Cannot connect to backend.");
     }
     throw error;
   }
 }
-

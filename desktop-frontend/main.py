@@ -26,7 +26,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 # API Configuration
-API_BASE_URL = 'http://localhost:8000/api'
+API_BASE_URL = 'https://chemical-equipment-api-01hg.onrender.com/api'
 
 # Global auth credentials
 auth_credentials = None
