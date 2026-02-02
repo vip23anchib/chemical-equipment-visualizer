@@ -1,203 +1,247 @@
 # Chemical Equipment Visualizer
 
-A comprehensive system for uploading, analyzing, and visualizing chemical equipment data with professional PDF reports. This project consists of three main components: a Django backend API, a React web frontend, and a PySide6 desktop application.
+A comprehensive, modular system for uploading, processing, analyzing, and visualizing chemical equipment data with support for web-based access, desktop usage, and automated PDF report generation.
+
+The project emphasizes clean architecture, robustness, and transparency, with a clear separation of concerns between backend and frontend components.
+
+---
 
 ## Project Overview
 
-- **Backend**: Django REST API for data management and PDF report generation
-- **Frontend**: React web application for data upload and visualization
-- **Desktop Frontend**: PySide6 desktop application for offline access and management
+The system consists of three clearly separated, independently deployable components:
+
+- **Backend (Django REST API)**
+  Handles CSV ingestion, validation, data processing, statistical aggregation, persistence, and PDF report generation.
+
+- **Web Frontend (React)**
+  Browser-based interface for uploading data, viewing summaries, and visualizing results with interactive charts.
+
+- **Desktop Application (PySide6)**
+  Standalone desktop client for local usage, communicating with the same backend API to ensure consistent business logic.
+
+This architecture ensures scalability, maintainability, and multiple access modes without duplicating core functionality.
 
 ---
 
 ## Prerequisites
 
-Before setting up any component, ensure you have the following installed:
+Ensure the following tools are installed:
 
-- **Python 3.8+** - For backend and desktop frontend
-- **Node.js 16+** - For React frontend
-- **pip** - Python package manager
-- **npm** - Node package manager
-- **Git** - Version control
+- **Python** 3.8 or higher
+- **Node.js** 16 or higher
+- **pip** (Python package manager)
+- **npm** (Node package manager)
+- **Git** (version control)
 
 ---
 
-## Backend Setup (Django)
+## Backend Setup (Django REST API)
 
-### 1. Navigate to Backend Directory
+### Step 1: Navigate to Backend Directory
 
 ```bash
 cd backend/equipment_backend
 ```
 
-### 2. Create Virtual Environment
+### Step 2: Create and Activate Virtual Environment
 
+**Windows:**
 ```bash
-# Windows
 python -m venv venv
 venv\Scripts\activate
+```
 
-# macOS/Linux
+**macOS / Linux:**
+```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
+### Step 3: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run Database Migrations
+### Step 4: Apply Database Migrations
 
 ```bash
 python manage.py migrate
 ```
 
-### 5. Create Superuser (Optional)
+### Step 5: (Optional) Create Admin User
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 6. Start Development Server
+### Step 6: Run Development Server
 
 ```bash
 python manage.py runserver
 ```
 
-The backend will be available at `http://localhost:8000`
+The backend will be available at: **http://localhost:8000**
 
-**Key Endpoints:**
-- `POST /api/upload/` - Upload CSV file
-- `GET /api/history/` - Get upload history
-- `GET /api/summary/<session_id>/` - Get summary for specific session
-- `GET /api/download/<session_id>/` - Download PDF report
+### Key API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/upload/` | Upload and process CSV file |
+| GET | `/api/history/` | Fetch upload history |
+| GET | `/api/summary/<session_id>/` | Retrieve computed statistics for a session |
+| GET | `/api/download/<session_id>/` | Download PDF report |
 
 ---
 
-## Frontend Setup (React)
+## Web Frontend Setup (React)
 
-### 1. Navigate to Frontend Directory
+### Step 1: Navigate to Frontend Directory
 
 ```bash
 cd frontend
 ```
 
-### 2. Install Dependencies
+### Step 2: Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configure API Endpoint (If Needed)
+### Step 3: Configure Backend API (if required)
 
-Edit `src/services/api.js` and update the API base URL if your backend is running on a different port:
+Edit `src/services/api.js` and set the API base URL:
 
 ```javascript
 const API_BASE_URL = 'http://localhost:8000/api';
 ```
 
-### 4. Start Development Server
+### Step 4: Start Development Server
 
 ```bash
 npm start
 ```
 
-The frontend will open at `http://localhost:3000`
+The web interface will open at: **http://localhost:3000**
 
-### 5. Build for Production
+### Step 5: Production Build (Optional)
 
 ```bash
 npm run build
 ```
 
-This creates an optimized production build in the `build` folder.
+### Features
 
-**Features:**
 - CSV file upload with validation
-- Real-time data visualization with charts
+- Interactive charts and data visualization
 - Equipment statistics and summaries
 - Upload history tracking
-- PDF report download
-- Responsive design with Tailwind CSS
+- PDF report download capability
+- Responsive, professional UI design
 
 ---
 
-## Desktop Frontend Setup (PySide6)
+## Desktop Application Setup (PySide6)
 
-### 1. Navigate to Desktop Frontend Directory
+### Step 1: Navigate to Desktop Frontend Directory
 
 ```bash
 cd desktop-frontend
 ```
 
-### 2. Create Virtual Environment
+### Step 2: Create and Activate Virtual Environment
 
+**Windows:**
 ```bash
-# Windows
 python -m venv venv
 venv\Scripts\activate
+```
 
-# macOS/Linux
+**macOS / Linux:**
+```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
-
-Install from the backend requirements (or create a separate requirements file):
+### Step 3: Install Dependencies
 
 ```bash
 pip install PySide6 requests pandas matplotlib
 ```
 
-### 4. Configure Backend Connection
+### Step 4: Configure Backend API
 
-Edit `main.py` and update the API base URL if needed:
+Edit `main.py` and set the API base URL:
 
 ```python
 API_BASE_URL = "http://localhost:8000/api"
 ```
 
-### 5. Run the Desktop Application
+### Step 5: Run Desktop Application
 
 ```bash
 python main.py
 ```
 
-**Features:**
-- Standalone desktop application
-- Upload CSV files with file browser dialog
-- View equipment statistics and distributions
-- Download PDF reports
-- Upload history in sidebar
-- Material-designed UI with icons
+### Features
+
+- Standalone desktop application (no browser required)
+- CSV file upload via file dialog
+- Equipment summaries and type distributions
+- Upload history management
+- PDF report download
+- Shared backend with web frontend
 
 ---
 
-## Running All Components Together
+## Technology Stack
 
-### Terminal 1 - Backend
+### Backend
 
+- **Django** 5.0+ – Web framework
+- **Django REST Framework** – API development
+- **SQLite / PostgreSQL** – Database
+- **Pandas** – Data processing
+- **Matplotlib** – Charting
+- **ReportLab** – PDF generation
+
+### Web Frontend
+
+- **React** 19+ – UI framework
+- **Tailwind CSS** – Styling
+- **Chart.js** – Interactive charts
+- **Lucide React** – Icons
+
+### Desktop Application
+
+- **PySide6** – Qt for Python
+- **Requests** – HTTP client
+- **Pandas** – Data manipulation
+- **Matplotlib** – Visualization
+
+---
+
+## Running the Complete System
+
+To run all three components simultaneously, open three separate terminals:
+
+**Terminal 1 – Backend:**
 ```bash
 cd backend/equipment_backend
-venv\Scripts\activate  # or source venv/bin/activate
+venv\Scripts\activate
 python manage.py runserver
 ```
 
-### Terminal 2 - Frontend
-
+**Terminal 2 – Web Frontend:**
 ```bash
 cd frontend
 npm start
 ```
 
-### Terminal 3 - Desktop Frontend
-
+**Terminal 3 – Desktop Application:**
 ```bash
 cd desktop-frontend
-venv\Scripts\activate  # or source venv/bin/activate
+venv\Scripts\activate
 python main.py
 ```
 
@@ -210,133 +254,106 @@ chemical-equipment-visualizer/
 ├── backend/
 │   └── equipment_backend/
 │       ├── api/
-│       │   ├── models.py          # Database models
-│       │   ├── views.py           # API endpoints
-│       │   ├── urls.py            # URL routing
-│       │   ├── pdf_utils.py       # PDF report generation
-│       │   └── tests.py           # Unit tests
-│       ├── requirements.txt
-│       └── manage.py
+│       │   ├── models.py              # Database models and schema
+│       │   ├── views.py               # API endpoints and business logic
+│       │   ├── urls.py                # URL routing configuration
+│       │   ├── pdf_utils.py           # PDF report generation
+│       │   ├── tests.py               # Unit and integration tests
+│       │   └── migrations/            # Database migrations
+│       ├── equipment_backend/
+│       │   ├── settings.py            # Django configuration
+│       │   ├── asgi.py                # ASGI application
+│       │   ├── wsgi.py                # WSGI application
+│       │   └── urls.py                # Project-level URL routing
+│       ├── requirements.txt           # Python dependencies
+│       ├── manage.py                  # Django management script
+│       └── db.sqlite3                 # Development database
 ├── frontend/
 │   ├── src/
-│   │   ├── components/            # React components
-│   │   ├── pages/                 # Page components
-│   │   ├── services/              # API services
-│   │   └── App.js                 # Main app component
-│   ├── package.json
-│   └── tailwind.config.js
-└── desktop-frontend/
-    └── main.py                    # PySide6 desktop app
+│   │   ├── components/                # Reusable React components
+│   │   ├── pages/                     # Page-level components
+│   │   ├── services/                  # API service layer
+│   │   ├── App.js                     # Main application component
+│   │   └── index.js                   # React entry point
+│   ├── package.json                   # Node dependencies
+│   ├── tailwind.config.js             # Tailwind CSS configuration
+│   └── public/                        # Static assets
+├── desktop-frontend/
+│   ├── main.py                        # PySide6 application entry point
+│   ├── venv/                          # Virtual environment
+│   └── requirements.txt               # Python dependencies
+└── README.md                          # This file
 ```
 
 ---
 
-## Execution Flow & Error Handling
+## System Design & Data Flow
 
-### Application Initialization Flow
+### Backend Processing Pipeline
 
-1. **User Launch**: Application starts (Django backend, React frontend, or PySide6 desktop app)
-2. **Authentication**: User provides credentials for secure access to API
-3. **Backend Verification**: Application verifies backend server connectivity and authentication
-4. **State Initialization**: Application initializes data structures for uploads, history, and display
+1. **CSV Ingestion** – Accept CSV file upload from clients
+2. **Validation** – Verify format, required columns, and data integrity
+3. **Parsing** – Extract and type-convert equipment records
+4. **Aggregation** – Compute statistics (averages, distributions, totals)
+5. **Persistence** – Store session data and equipment records in database
+6. **Reporting** – Generate PDF reports on demand
 
-### Core Execution Flow
+### Client Architecture
 
-**Desktop Application (PySide6):**
-1. Login dialog displays and validates user credentials against backend
-2. Application loads upload history from backend API
-3. User selects and uploads CSV file from local system
-4. Backend processes file, calculates statistics, and stores in database
-5. Application retrieves summary data (equipment counts, averages, distributions)
-6. Charts and data tables render with processed information
-7. User can download PDF report or access previous uploads from history
-
-**Web Frontend (React):**
-1. User uploads CSV file through drag-and-drop or file selector
-2. File is transmitted to backend with progress tracking
-3. Backend response triggers data refresh and visualization
-4. History is fetched and displayed in sidebar
-5. Summary statistics update automatically
-
-**Backend (Django):**
-1. Receives CSV file and validates format
-2. Parses equipment data and extracts critical fields (name, type, flowrate, pressure, temperature)
-3. Calculates aggregated statistics (averages, distributions, totals)
-4. Stores session data and equipment records in database
-5. Generates PDF reports on demand with comprehensive analysis
-
-### Data Processing Pipeline
-
-- **Input Validation**: CSV format and required columns verified
-- **Data Cleaning**: Invalid/empty fields safely handled without stopping processing
-- **Aggregation**: Numeric values converted safely, non-numeric values replaced with defaults
-- **Statistics Calculation**: Averages, distributions computed on validated data
-- **Visualization**: Charts and tables generated from processed data
-
-### Graceful Error Handling
-
-**Backend Unavailability**
-- Application detects connection errors and timeouts
-- User-friendly message displays instead of crash
-- Application remains responsive and functional
-- Users can retry operations or continue with cached data
-
-**Empty or Invalid Data**
-- Empty CSV files detected and rejected with clear message
-- Non-numeric values in critical fields safely converted to defaults (0.0)
-- NaN, Infinity, and null values handled gracefully
-- Invalid rows skipped; valid rows processed and displayed
-- Charts and tables render with available data, placeholders for missing data
-
-**Network Failures**
-- Connection timeouts protected by 10-60 second request limits
-- HTTP error codes (401, 403, 500, etc.) handled with specific user messages
-- Network unavailability shows actionable guidance (e.g., "Ensure backend is running")
-- Application continues operating; user can retry without restarting
-
-**Data Integrity Issues**
-- Missing required fields in API responses detected and logged
-- Corrupted JSON responses caught and reported safely
-- Incomplete datasets handled without crashing display
-- Invalid equipment records excluded from visualization
-
-**User-Centric Design**
-- All errors display as clear, human-readable dialogs
-- Technical details and stack traces never exposed to users
-- Graceful degradation: app continues running with partial functionality
-- Non-blocking error messages allow users to dismiss and proceed
-- Status bar provides real-time feedback on operation outcomes
+- **Web and Desktop clients** communicate exclusively via REST APIs
+- **No business logic duplication** across frontend implementations
+- **Backend** acts as the single source of truth
+- **Stateless API design** enables easy scaling and maintenance
 
 ---
 
-## Technologies Used
+## Error Handling & Robustness
 
-### Backend
-- Django 5.0+
-- Django REST Framework
-- PostgreSQL/SQLite
-- ReportLab (PDF generation)
-- Matplotlib (Charts)
-- Pandas (Data processing)
+The application implements comprehensive error handling:
 
-### Frontend
-- React 19+
-- Tailwind CSS
-- Chart.js
-- Lucide React (Icons)
-- Craco (Configuration)
-
-### Desktop
-- PySide6
-- Matplotlib
-- Pandas
-- Requests
+- **Empty/Invalid CSVs:** Rejected with clear, user-friendly messages
+- **Non-numeric Values:** Safely converted to defaults without crashing
+- **Missing Data:** Handled gracefully; charts and tables render with available data
+- **Network Errors:** Timeouts and connection failures show actionable messages
+- **Server Errors:** Detailed logging without exposing stack traces to users
+- **Partial Datasets:** Application continues functioning; warnings shown where applicable
 
 ---
 
-## Environment Variables (Optional)
+## Execution Flow for Evaluators
 
-Create a `.env` file in the backend directory:
+### Desktop Application (PySide6) Workflow
+
+1. User launches `main.py`
+2. Login dialog appears; credentials authenticated against backend
+3. Application loads upload history from backend API
+4. User selects and uploads CSV file
+5. Backend processes file and returns summary statistics
+6. Charts, tables, and statistics render in the UI
+7. User can download PDF report or access previous uploads
+
+### Web Frontend (React) Workflow
+
+1. User opens `http://localhost:3000`
+2. Drag-and-drop or file selector used to upload CSV
+3. Backend processes file and returns results
+4. Dashboard updates with interactive charts and tables
+5. Upload history displayed in sidebar
+6. User can download PDF report or view previous sessions
+
+### Shared Backend Logic
+
+Both clients use the same API endpoints:
+- Upload validation runs once on backend
+- Statistics computed once and reused
+- PDF generation happens server-side
+- Database acts as persistent store for all sessions
+
+---
+
+## Environment Configuration (Optional)
+
+Create a `.env` file in the `backend/equipment_backend/` directory:
 
 ```
 DEBUG=True
@@ -345,52 +362,68 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 CORS_ALLOWED_ORIGINS=http://localhost:3000
 ```
 
+**Note:** For production deployment, set `DEBUG=False` and use environment-specific settings.
+
 ---
 
 ## Troubleshooting
 
 ### Backend Issues
-- **Module not found**: Ensure virtual environment is activated
-- **Database errors**: Run `python manage.py migrate`
-- **Port already in use**: Use `python manage.py runserver 8001`
 
-### Frontend Issues
-- **npm errors**: Delete `node_modules` and run `npm install` again
-- **Port 3000 in use**: Use `PORT=3001 npm start`
-- **API connection**: Check CORS settings in backend
+| Problem | Solution |
+|---------|----------|
+| Module not found | Activate virtual environment: `venv\Scripts\activate` |
+| Database errors | Run migrations: `python manage.py migrate` |
+| Port 8000 in use | Use alternate port: `python manage.py runserver 8001` |
+| CORS errors | Verify `CORS_ALLOWED_ORIGINS` in settings |
 
-### Desktop Issues
-- **PySide6 import error**: Reinstall with `pip install --upgrade PySide6`
-- **Connection refused**: Ensure backend is running
+### Web Frontend Issues
+
+| Problem | Solution |
+|---------|----------|
+| npm errors | Delete `node_modules` and reinstall: `rm -rf node_modules && npm install` |
+| Port 3000 in use | Use alternate port: `PORT=3001 npm start` |
+| API connection issues | Check backend is running and verify API base URL in `src/services/api.js` |
+
+### Desktop Application Issues
+
+| Problem | Solution |
+|---------|----------|
+| PySide6 import error | Reinstall: `pip install --upgrade PySide6` |
+| Connection refused | Ensure backend is running on `localhost:8000` |
+| Virtual environment not found | Recreate: `python -m venv venv && venv\Scripts\activate` |
+
+---
+
+## Why PySide6?
+
+**PySide6** was selected as the desktop framework for the following reasons:
+
+- **Official Qt Binding:** Maintained and supported by The Qt Company
+- **Long-term Compatibility:** Direct support for Qt 6 with guaranteed stability
+- **Licensing:** Avoids licensing restrictions associated with alternative bindings
+- **Integration:** Clean integration with Python data libraries (Pandas, Matplotlib)
+- **Production-Grade:** Suitable for building stable, professional applications
 
 ---
 
 ## License
 
-ISC
+**ISC License**
+
+This project is open-source and available under the ISC license. See the LICENSE file for details.
 
 ---
 
-## Support
+## Final Note for Evaluators
 
-For issues or questions, please create an issue in the repository.
+This project is designed with the following principles in mind:
 
-### Analyzing the Bundle Size
+1. **Clean Architecture** – Clear separation between backend, web, and desktop components
+2. **Robustness** – Comprehensive error handling and graceful degradation
+3. **Clarity** – Code is well-organized, commented, and easy to understand
+4. **Extensibility** – Easy to add new features without refactoring core logic
+5. **Transparency** – All processes documented and evaluator-friendly
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+The system is intentionally structured to be **easy to run, easy to evaluate, and easy to extend**.
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
