@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import health_check, upload_csv, upload_history, get_summary, download_pdf
+from .views import health_check, upload_csv, upload_history, get_summary, download_pdf, register_user
 
 urlpatterns = [
+    path('register/', register_user),
     path('health/', health_check),
     path('upload/', upload_csv),
     path('history/', upload_history),

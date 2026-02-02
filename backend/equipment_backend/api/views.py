@@ -1,9 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 
 from django.http import FileResponse
+from django.contrib.auth.models import User
 from .pdf_utils import generate_pdf
 
 
@@ -11,6 +12,41 @@ from .pdf_utils import generate_pdf
 import pandas as pd
 
 from .models import UploadRecord, Equipment
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_user(request):
+    """Register a new user account."""
+    username = request.data.get('username', '').strip()
+    email = request.data.get('email', '').strip()
+    password = request.data.get('password', '')
+    
+    # Validation
+    if not username or len(username) < 3:
+        return Response({"error": "Username must be at least 3 characters"}, status=400)
+    
+    if not password or len(password) < 6:
+        return Response({"error": "Password must be at least 6 characters"}, status=400)
+    
+    if User.objects.filter(username=username).exists():
+        return Response({"error": "Username already exists"}, status=400)
+    
+    if email and User.objects.filter(email=email).exists():
+        return Response({"error": "Email already registered"}, status=400)
+    
+    try:
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+        return Response({
+            "message": "Account created successfully",
+            "username": user.username
+        }, status=201)
+    except Exception as e:
+        return Response({"error": f"Failed to create account: {str(e)}"}, status=500)
 
 
 

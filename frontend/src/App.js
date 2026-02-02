@@ -220,6 +220,36 @@ function App() {
   };
 
   // Login Screen
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [email, setEmail] = useState('');
+  const [registerSuccess, setRegisterSuccess] = useState(null);
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoginError(null);
+    setRegisterSuccess(null);
+
+    try {
+      const res = await fetch(`${API}/register/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setRegisterSuccess('Account created! You can now sign in.');
+        setIsRegistering(false);
+        setEmail('');
+      } else {
+        setLoginError(data.error || 'Registration failed');
+      }
+    } catch (err) {
+      setLoginError('Connection failed');
+    }
+  };
+
   if (!user) {
     return (
       <div className="app" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -227,12 +257,19 @@ function App() {
           <div className="card-header" style={{ justifyContent: 'center', borderBottom: 'none', paddingBottom: '0' }}>
             <div className="logo" style={{ flexDirection: 'column', gap: '16px' }}>
               <div className="logo-icon" style={{ width: '64px', height: '64px', fontSize: '32px' }}></div>
-              <h1 style={{ fontSize: '24px' }}>Welcome Back</h1>
-              <p style={{ color: '#5e6c84' }}>Sign in to Chemical Equipment Visualizer</p>
+              <h1 style={{ fontSize: '24px' }}>{isRegistering ? 'Create Account' : 'Welcome Back'}</h1>
+              <p style={{ color: '#5e6c84' }}>
+                {isRegistering ? 'Sign up for Chemical Equipment Visualizer' : 'Sign in to Chemical Equipment Visualizer'}
+              </p>
             </div>
           </div>
           <div className="card-body">
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {registerSuccess && (
+              <div style={{ color: '#00875a', fontSize: '14px', marginBottom: '16px', padding: '10px', background: '#e3fcef', borderRadius: '4px' }}>
+                {registerSuccess}
+              </div>
+            )}
+            <form onSubmit={isRegistering ? handleRegister : handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#172b4d' }}>Username</label>
                 <input
@@ -244,6 +281,18 @@ function App() {
                   required
                 />
               </div>
+              {isRegistering && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#172b4d' }}>Email (optional)</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #dfe1e6' }}
+                    placeholder="Enter email"
+                  />
+                </div>
+              )}
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: '#172b4d' }}>Password</label>
                 <input
@@ -251,13 +300,24 @@ function App() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #dfe1e6' }}
-                  placeholder="Enter password"
+                  placeholder={isRegistering ? 'Create password (min 6 chars)' : 'Enter password'}
                   required
                 />
               </div>
               {loginError && <div style={{ color: '#de350b', fontSize: '14px' }}>{loginError}</div>}
-              <button type="submit" className="btn btn-primary" style={{ height: '40px', fontSize: '14px' }}>Sign In</button>
+              <button type="submit" className="btn btn-primary" style={{ height: '40px', fontSize: '14px' }}>
+                {isRegistering ? 'Create Account' : 'Sign In'}
+              </button>
             </form>
+            <div style={{ marginTop: '16px', textAlign: 'center' }}>
+              <button
+                type="button"
+                onClick={() => { setIsRegistering(!isRegistering); setLoginError(null); setRegisterSuccess(null); }}
+                style={{ background: 'none', border: 'none', color: '#0052cc', cursor: 'pointer', fontSize: '14px' }}
+              >
+                {isRegistering ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

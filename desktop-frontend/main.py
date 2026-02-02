@@ -33,12 +33,13 @@ auth_credentials = None
 
 
 class LoginDialog(QDialog):
-    """Login dialog for authentication."""
+    """Login dialog for authentication with registration support."""
     
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.is_registering = False
         self.setWindowTitle("Chemical Equipment Visualizer - Login")
-        self.setFixedSize(500, 450)
+        self.setFixedSize(500, 520)
         self.setModal(True)
         
         layout = QVBoxLayout(self)
@@ -48,66 +49,131 @@ class LoginDialog(QDialog):
         # Main container with padding
         container = QWidget()
         container.setObjectName("loginContainer")
-        container_layout = QVBoxLayout(container)
-        container_layout.setSpacing(20)
-        container_layout.setContentsMargins(60, 50, 60, 50)
+        self.container_layout = QVBoxLayout(container)
+        self.container_layout.setSpacing(15)
+        self.container_layout.setContentsMargins(60, 40, 60, 40)
         
         # Logo/Icon area
         icon_label = QLabel("")
         icon_label.setFont(QFont('Segoe UI Emoji', 48))
         icon_label.setAlignment(Qt.AlignCenter)
         icon_label.setStyleSheet("background: transparent;")
-        container_layout.addWidget(icon_label)
+        self.container_layout.addWidget(icon_label)
         
         # Title
-        title = QLabel("Chemical Equipment Visualizer")
-        title.setFont(QFont('Segoe UI', 22, QFont.Bold))
-        title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #111827; background: transparent; line-height: 1.4; margin: 5px 0;")
-        title.setWordWrap(True)
-        container_layout.addWidget(title)
+        self.title = QLabel("Chemical Equipment Visualizer")
+        self.title.setFont(QFont('Segoe UI', 20, QFont.Bold))
+        self.title.setAlignment(Qt.AlignCenter)
+        self.title.setStyleSheet("color: #111827; background: transparent; line-height: 1.4; margin: 5px 0;")
+        self.title.setWordWrap(True)
+        self.container_layout.addWidget(self.title)
         
         # Subtitle
-        subtitle = QLabel("Sign in to continue")
-        subtitle.setFont(QFont('Segoe UI', 11))
-        subtitle.setAlignment(Qt.AlignCenter)
-        subtitle.setStyleSheet("color: #4b5563; background: transparent; margin-bottom: 10px;")
-        container_layout.addWidget(subtitle)
+        self.subtitle = QLabel("Sign in to continue")
+        self.subtitle.setFont(QFont('Segoe UI', 11))
+        self.subtitle.setAlignment(Qt.AlignCenter)
+        self.subtitle.setStyleSheet("color: #4b5563; background: transparent; margin-bottom: 5px;")
+        self.container_layout.addWidget(self.subtitle)
         
         # Username field
         self.username_input = QLineEdit()
         self.username_input.setPlaceholderText("Username")
-        self.username_input.setMinimumHeight(50)
+        self.username_input.setMinimumHeight(45)
         self.username_input.setFont(QFont('Segoe UI', 11))
-        container_layout.addWidget(self.username_input)
+        self.container_layout.addWidget(self.username_input)
+        
+        # Email field (for registration)
+        self.email_input = QLineEdit()
+        self.email_input.setPlaceholderText("Email (optional)")
+        self.email_input.setMinimumHeight(45)
+        self.email_input.setFont(QFont('Segoe UI', 11))
+        self.email_input.hide()
+        self.container_layout.addWidget(self.email_input)
         
         # Password field
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("Password")
         self.password_input.setEchoMode(QLineEdit.Password)
-        self.password_input.setMinimumHeight(50)
+        self.password_input.setMinimumHeight(45)
         self.password_input.setFont(QFont('Segoe UI', 11))
-        container_layout.addWidget(self.password_input)
+        self.container_layout.addWidget(self.password_input)
         
-        # Spacer
-        container_layout.addSpacing(10)
+        # Action button
+        self.action_btn = QPushButton("Sign In")
+        self.action_btn.setMinimumHeight(45)
+        self.action_btn.setFont(QFont('Segoe UI', 12, QFont.Bold))
+        self.action_btn.setCursor(Qt.PointingHandCursor)
+        self.action_btn.clicked.connect(self.handle_action)
+        self.container_layout.addWidget(self.action_btn)
         
-        # Login button
-        self.login_btn = QPushButton("Sign In")
-        self.login_btn.setMinimumHeight(50)
-        self.login_btn.setFont(QFont('Segoe UI', 12, QFont.Bold))
-        self.login_btn.setCursor(Qt.PointingHandCursor)
-        self.login_btn.clicked.connect(self.try_login)
-        container_layout.addWidget(self.login_btn)
+        # Toggle link
+        self.toggle_btn = QPushButton("Don't have an account? Create one")
+        self.toggle_btn.setObjectName("toggleBtn")
+        self.toggle_btn.setCursor(Qt.PointingHandCursor)
+        self.toggle_btn.clicked.connect(self.toggle_mode)
+        self.container_layout.addWidget(self.toggle_btn)
         
-        container_layout.addStretch()
+        self.container_layout.addStretch()
         layout.addWidget(container)
         
         # Allow Enter key to submit
-        self.password_input.returnPressed.connect(self.try_login)
+        self.password_input.returnPressed.connect(self.handle_action)
         self.username_input.returnPressed.connect(lambda: self.password_input.setFocus())
         
         self.apply_style()
+    
+    def toggle_mode(self):
+        self.is_registering = not self.is_registering
+        if self.is_registering:
+            self.subtitle.setText("Create a new account")
+            self.action_btn.setText("Create Account")
+            self.toggle_btn.setText("Already have an account? Sign in")
+            self.email_input.show()
+            self.password_input.setPlaceholderText("Password (min 6 characters)")
+        else:
+            self.subtitle.setText("Sign in to continue")
+            self.action_btn.setText("Sign In")
+            self.toggle_btn.setText("Don't have an account? Create one")
+            self.email_input.hide()
+            self.password_input.setPlaceholderText("Password")
+    
+    def handle_action(self):
+        if self.is_registering:
+            self.try_register()
+        else:
+            self.try_login()
+    
+    def try_register(self):
+        username = self.username_input.text().strip()
+        email = self.email_input.text().strip()
+        password = self.password_input.text()
+        
+        if not username or len(username) < 3:
+            QMessageBox.warning(self, "Input Required", "Username must be at least 3 characters")
+            return
+        
+        if not password or len(password) < 6:
+            QMessageBox.warning(self, "Input Required", "Password must be at least 6 characters")
+            return
+        
+        try:
+            response = requests.post(
+                f"{API_BASE_URL}/register/",
+                json={"username": username, "email": email, "password": password},
+                timeout=10
+            )
+            
+            if response.status_code == 201:
+                QMessageBox.information(self, "Success", "Account created successfully! You can now sign in.")
+                self.toggle_mode()  # Switch back to login
+                self.email_input.clear()
+            else:
+                data = response.json()
+                QMessageBox.warning(self, "Registration Failed", data.get("error", "Could not create account"))
+        except requests.exceptions.ConnectionError:
+            QMessageBox.critical(self, "Connection Error", "Cannot connect to the backend server.")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Registration failed: {str(e)[:100]}")
     
     def apply_style(self):
         self.setStyleSheet("""
@@ -146,6 +212,17 @@ class LoginDialog(QDialog):
             QPushButton:pressed {
                 background-color: #1e40af;
             }
+            #toggleBtn {
+                background: transparent;
+                color: #2563eb;
+                font-size: 12px;
+                font-weight: normal;
+                border: none;
+            }
+            #toggleBtn:hover {
+                color: #1d4ed8;
+                text-decoration: underline;
+            }
         """)
     
     def try_login(self):
@@ -159,7 +236,6 @@ class LoginDialog(QDialog):
         
         # Test authentication
         try:
-            # We use history endpoint to verify credentials
             response = requests.get(
                 f"{API_BASE_URL}/history/",
                 auth=HTTPBasicAuth(username, password),
@@ -171,16 +247,13 @@ class LoginDialog(QDialog):
             elif response.status_code == 401:
                 QMessageBox.warning(self, "Login Failed", "Invalid username or password. Please try again.")
             else:
-                # If server isn't enforcing auth, accept anyway
                 auth_credentials = HTTPBasicAuth(username, password)
                 self.accept()
                  
         except requests.exceptions.ConnectionError:
             QMessageBox.critical(self, "Connection Error", 
                 "Cannot connect to the backend server.\n\n"
-                "Make sure the Django server is running:\n"
-                "cd backend/equipment_backend\n"
-                "python manage.py runserver")
+                "Make sure the Django server is running.")
         except requests.exceptions.Timeout:
             QMessageBox.critical(self, "Connection Timeout", 
                 "Server took too long to respond.\n"
