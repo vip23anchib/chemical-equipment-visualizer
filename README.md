@@ -298,6 +298,84 @@ chemical-equipment-visualizer/
 
 ---
 
+## Execution Flow & Error Handling
+
+### Application Initialization Flow
+
+1. **User Launch**: Application starts (Django backend, React frontend, or PySide6 desktop app)
+2. **Authentication**: User provides credentials for secure access to API
+3. **Backend Verification**: Application verifies backend server connectivity and authentication
+4. **State Initialization**: Application initializes data structures for uploads, history, and display
+
+### Core Execution Flow
+
+**Desktop Application (PySide6):**
+1. Login dialog displays and validates user credentials against backend
+2. Application loads upload history from backend API
+3. User selects and uploads CSV file from local system
+4. Backend processes file, calculates statistics, and stores in database
+5. Application retrieves summary data (equipment counts, averages, distributions)
+6. Charts and data tables render with processed information
+7. User can download PDF report or access previous uploads from history
+
+**Web Frontend (React):**
+1. User uploads CSV file through drag-and-drop or file selector
+2. File is transmitted to backend with progress tracking
+3. Backend response triggers data refresh and visualization
+4. History is fetched and displayed in sidebar
+5. Summary statistics update automatically
+
+**Backend (Django):**
+1. Receives CSV file and validates format
+2. Parses equipment data and extracts critical fields (name, type, flowrate, pressure, temperature)
+3. Calculates aggregated statistics (averages, distributions, totals)
+4. Stores session data and equipment records in database
+5. Generates PDF reports on demand with comprehensive analysis
+
+### Data Processing Pipeline
+
+- **Input Validation**: CSV format and required columns verified
+- **Data Cleaning**: Invalid/empty fields safely handled without stopping processing
+- **Aggregation**: Numeric values converted safely, non-numeric values replaced with defaults
+- **Statistics Calculation**: Averages, distributions computed on validated data
+- **Visualization**: Charts and tables generated from processed data
+
+### Graceful Error Handling
+
+**Backend Unavailability**
+- Application detects connection errors and timeouts
+- User-friendly message displays instead of crash
+- Application remains responsive and functional
+- Users can retry operations or continue with cached data
+
+**Empty or Invalid Data**
+- Empty CSV files detected and rejected with clear message
+- Non-numeric values in critical fields safely converted to defaults (0.0)
+- NaN, Infinity, and null values handled gracefully
+- Invalid rows skipped; valid rows processed and displayed
+- Charts and tables render with available data, placeholders for missing data
+
+**Network Failures**
+- Connection timeouts protected by 10-60 second request limits
+- HTTP error codes (401, 403, 500, etc.) handled with specific user messages
+- Network unavailability shows actionable guidance (e.g., "Ensure backend is running")
+- Application continues operating; user can retry without restarting
+
+**Data Integrity Issues**
+- Missing required fields in API responses detected and logged
+- Corrupted JSON responses caught and reported safely
+- Incomplete datasets handled without crashing display
+- Invalid equipment records excluded from visualization
+
+**User-Centric Design**
+- All errors display as clear, human-readable dialogs
+- Technical details and stack traces never exposed to users
+- Graceful degradation: app continues running with partial functionality
+- Non-blocking error messages allow users to dismiss and proceed
+- Status bar provides real-time feedback on operation outcomes
+
+---
+
 ## Technologies Used
 
 ### Backend
