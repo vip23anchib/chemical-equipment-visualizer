@@ -27,11 +27,11 @@ export default function Dashboard() {
       
       // Show alert if warnings exist
       if (validationWarnings && validationWarnings.length > 0) {
-        let warningText = "⚠️ Data Validation Warnings:\n\n";
+        let warningText = "Data Validation Warnings:\n\n";
         validationWarnings.forEach(warning => {
           warningText += `${warning.message}\n`;
           warning.details.slice(0, 2).forEach(detail => {
-            warningText += `  • ${detail}\n`;
+            warningText += `  - ${detail}\n`;
           });
           if (warning.details.length > 2) {
             warningText += `  ... and ${warning.details.length - 2} more\n`;
@@ -66,7 +66,7 @@ export default function Dashboard() {
             {summary && (
               <section className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
                 <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                  <p className="text-sm text-blue-300">ℹ️ Data shown below is derived from the last uploaded CSV file.</p>
+                  <p className="text-sm text-blue-300">Data shown below is derived from the last uploaded CSV file.</p>
                 </div>
                 <div className="flex items-center justify-between mb-4">
                   <div>

@@ -238,7 +238,7 @@ export default function History() {
           <div>
             <h3 className="text-lg font-semibold text-white">Historical Analysis</h3>
             <p className="text-sm text-slate-400">
-              Tracking {history.length} uploads • Performance trends
+              Tracking {history.length} uploads - Performance trends
             </p>
           </div>
         </div>

@@ -89,7 +89,7 @@ export default function UploadBox({ onUpload, isLoading }) {
             <div>
               <p className="font-semibold text-white">{file.name}</p>
               <p className="text-sm text-slate-400">
-                {(file.size / 1024).toFixed(1)} KB • Ready to analyze
+                {(file.size / 1024).toFixed(1)} KB - Ready to analyze
               </p>
             </div>
             <button

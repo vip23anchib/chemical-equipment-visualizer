@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QPushButton, QLabel, QFileDialog, QTableWidget, QTableWidgetItem,
     QGroupBox, QMessageBox, QStatusBar, QFrame,
     QListWidget, QListWidgetItem, QSplitter,
-    QDialog, QLineEdit
+    QDialog, QLineEdit, QHeaderView
 )
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QFont, QPalette, QColor
@@ -52,7 +52,7 @@ class LoginDialog(QDialog):
         container_layout.setContentsMargins(60, 50, 60, 50)
         
         # Logo/Icon area
-        icon_label = QLabel("⚗️")
+        icon_label = QLabel("")
         icon_label.setFont(QFont('Segoe UI Emoji', 48))
         icon_label.setAlignment(Qt.AlignCenter)
         icon_label.setStyleSheet("background: transparent;")
@@ -75,14 +75,14 @@ class LoginDialog(QDialog):
         
         # Username field
         self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText("👤  Username")
+        self.username_input.setPlaceholderText("Username")
         self.username_input.setMinimumHeight(50)
         self.username_input.setFont(QFont('Segoe UI', 11))
         container_layout.addWidget(self.username_input)
         
         # Password field
         self.password_input = QLineEdit()
-        self.password_input.setPlaceholderText("🔒  Password")
+        self.password_input.setPlaceholderText("Password")
         self.password_input.setEchoMode(QLineEdit.Password)
         self.password_input.setMinimumHeight(50)
         self.password_input.setFont(QFont('Segoe UI', 11))
@@ -250,7 +250,7 @@ class ChemicalVisualizerApp(QMainWindow):
         sidebar_layout.setSpacing(10)
 
         # Upload section
-        upload_group = QGroupBox("📤 Upload CSV")
+        upload_group = QGroupBox("UPLOAD CSV")
         upload_layout = QVBoxLayout(upload_group)
         
         self.upload_btn = QPushButton("Select CSV File")
@@ -265,7 +265,7 @@ class ChemicalVisualizerApp(QMainWindow):
         sidebar_layout.addWidget(upload_group)
 
         # History section
-        history_group = QGroupBox("📜 Upload History")
+        history_group = QGroupBox("UPLOAD HISTORY")
         history_layout = QVBoxLayout(history_group)
         
         self.history_list = QListWidget()
@@ -275,19 +275,19 @@ class ChemicalVisualizerApp(QMainWindow):
         sidebar_layout.addWidget(history_group)
 
         # Actions section
-        actions_group = QGroupBox("⚡ Actions")
+        actions_group = QGroupBox("ACTIONS")
         actions_layout = QVBoxLayout(actions_group)
         
-        self.refresh_btn = QPushButton("🔄 Refresh Data")
+        self.refresh_btn = QPushButton("Refresh Data")
         self.refresh_btn.clicked.connect(self.load_history)
         actions_layout.addWidget(self.refresh_btn)
         
-        self.download_btn = QPushButton("📄 Download PDF Report")
+        self.download_btn = QPushButton("Download PDF Report")
         self.download_btn.clicked.connect(self.download_report)
         self.download_btn.setEnabled(False)
         actions_layout.addWidget(self.download_btn)
         
-        self.logout_btn = QPushButton("🚪 Logout")
+        self.logout_btn = QPushButton("Logout")
         self.logout_btn.clicked.connect(self.logout)
         actions_layout.addWidget(self.logout_btn)
         
@@ -305,7 +305,7 @@ class ChemicalVisualizerApp(QMainWindow):
         top_layout.setSpacing(15)
 
         # Summary section - Use a grid for better layout
-        summary_group = QGroupBox("📊 Summary Statistics")
+        summary_group = QGroupBox("SUMMARY STATISTICS")
         summary_group.setMinimumWidth(300)
         summary_group.setMaximumWidth(350)
         summary_layout = QVBoxLayout(summary_group)
@@ -333,7 +333,7 @@ class ChemicalVisualizerApp(QMainWindow):
             value_label.setStyleSheet("color: #2563eb;")
             value_label.setAlignment(Qt.AlignCenter)
             
-            name_label = QLabel(stat_name)
+            name_label = QLabel(stat_name.upper())
             name_label.setFont(QFont('Arial', 10, QFont.Bold))
             name_label.setStyleSheet("color: #1f2937;")
             name_label.setAlignment(Qt.AlignCenter)
@@ -359,14 +359,14 @@ class ChemicalVisualizerApp(QMainWindow):
         charts_layout.setSpacing(15)
 
         # Bar chart
-        bar_group = QGroupBox("📈 Average Process Parameters")
+        bar_group = QGroupBox("AVERAGE PROCESS PARAMETERS")
         bar_layout = QVBoxLayout(bar_group)
         self.bar_canvas = MplCanvas(self, width=5, height=4)
         bar_layout.addWidget(self.bar_canvas)
         charts_layout.addWidget(bar_group)
 
         # Pie chart
-        pie_group = QGroupBox("🥧 Equipment Type Distribution")
+        pie_group = QGroupBox("EQUIPMENT TYPE DISTRIBUTION")
         pie_layout = QVBoxLayout(pie_group)
         self.pie_canvas = MplCanvas(self, width=6, height=5)
         pie_layout.addWidget(self.pie_canvas)
@@ -376,13 +376,21 @@ class ChemicalVisualizerApp(QMainWindow):
         content_splitter.addWidget(top_widget)
 
         # Bottom section - Data Table
-        table_group = QGroupBox("📋 Equipment Data")
+        table_group = QGroupBox("EQUIPMENT DATA")
         table_layout = QVBoxLayout(table_group)
         
         self.data_table = QTableWidget()
         self.data_table.setColumnCount(5)
-        self.data_table.setHorizontalHeaderLabels(['Name', 'Type', 'Flowrate (m³/h)', 'Pressure (bar)', 'Temperature (°C)'])
-        self.data_table.horizontalHeader().setStretchLastSection(True)
+        # Professional, uppercase headers
+        self.data_table.setHorizontalHeaderLabels([
+            'NAME', 'TYPE', 'FLOWRATE (M³/H)', 'PRESSURE (BAR)', 'TEMPERATURE (°C)'
+        ])
+        header = self.data_table.horizontalHeader()
+        header.setDefaultAlignment(Qt.AlignCenter)
+        header.setFont(QFont('Segoe UI', 10, QFont.Bold))
+        # Evenly distribute all columns
+        for i in range(self.data_table.columnCount()):
+            header.setSectionResizeMode(i, QHeaderView.Stretch)
         table_layout.addWidget(self.data_table)
         
         content_splitter.addWidget(table_group)
@@ -502,7 +510,7 @@ class ChemicalVisualizerApp(QMainWindow):
 
     def on_upload_success(self, data):
         self.session_data = data
-        self.upload_status.setText(f"✅ Uploaded")
+        self.upload_status.setText(f"Uploaded")
         self.upload_btn.setEnabled(True)
         self.download_btn.setEnabled(True)
         self.status_bar.showMessage("Upload successful!")
@@ -513,10 +521,10 @@ class ChemicalVisualizerApp(QMainWindow):
             # Build warning message
             warning_text = "Data Validation Warnings:\n\n"
             for warning in warnings:
-                warning_text += f"⚠️ {warning['message']}\n"
+                warning_text += f"{warning['message']}\n"
                 # Show first 2 details as examples
                 for detail in warning['details'][:2]:
-                    warning_text += f"  • {detail}\n"
+                    warning_text += f"  - {detail}\n"
                 if len(warning['details']) > 2:
                     warning_text += f"  ... and {len(warning['details']) - 2} more\n"
                 warning_text += "\n"
@@ -528,7 +536,7 @@ class ChemicalVisualizerApp(QMainWindow):
         self.load_history()
 
     def on_upload_error(self, error):
-        self.upload_status.setText(f"❌ Error")
+        self.upload_status.setText(f"Error")
         self.upload_btn.setEnabled(True)
         self.status_bar.showMessage("Upload failed!")
         QMessageBox.critical(self, "Upload Error", f"Failed to upload file:\n{error}")
@@ -648,10 +656,10 @@ class ChemicalVisualizerApp(QMainWindow):
             # Build warning message
             warning_text = "Data Validation Warnings:\n\n"
             for warning in warnings:
-                warning_text += f"⚠️ {warning['message']}\n"
+                warning_text += f"{warning['message']}\n"
                 # Show first 2 details as examples
                 for detail in warning['details'][:2]:
-                    warning_text += f"  • {detail}\n"
+                    warning_text += f"  - {detail}\n"
                 if len(warning['details']) > 2:
                     warning_text += f"  ... and {len(warning['details']) - 2} more\n"
                 warning_text += "\n"
@@ -708,7 +716,8 @@ class ChemicalVisualizerApp(QMainWindow):
             ]
             self.bar_canvas.axes.bar(categories, values, color=['#2563eb', '#059669', '#d97706'])
             self.bar_canvas.axes.set_ylabel('Value', fontsize=10)
-            self.bar_canvas.axes.set_title('Average Process Parameters', fontsize=11, fontweight='bold')
+            # Title removed from inside the chart because the surrounding group box
+            # already displays 'AVERAGE PROCESS PARAMETERS'
             self.bar_canvas.draw()
             
             # Pie Chart
@@ -734,7 +743,8 @@ class ChemicalVisualizerApp(QMainWindow):
                         fontsize=9,
                         frameon=True
                     )
-                    self.pie_canvas.axes.set_title('Equipment Type Distribution', fontsize=9, fontweight='bold', pad=10)
+                    # Title removed from inside the chart because the surrounding group box
+                    # already displays 'EQUIPMENT TYPE DISTRIBUTION'
                 else:
                     self.pie_canvas.axes.text(0.5, 0.5, 'No valid distribution data', 
                                             ha='center', va='center', fontsize=10)

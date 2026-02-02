@@ -225,7 +225,7 @@ function App() {
         <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '20px' }}>
           <div className="card-header" style={{ justifyContent: 'center', borderBottom: 'none', paddingBottom: '0' }}>
             <div className="logo" style={{ flexDirection: 'column', gap: '16px' }}>
-              <div className="logo-icon" style={{ width: '64px', height: '64px', fontSize: '32px' }}>⚗️</div>
+              <div className="logo-icon" style={{ width: '64px', height: '64px', fontSize: '32px' }}></div>
               <h1 style={{ fontSize: '24px' }}>Welcome Back</h1>
               <p style={{ color: '#5e6c84' }}>Sign in to Chemical Equipment Visualizer</p>
             </div>
@@ -268,7 +268,7 @@ function App() {
       <header className="header">
         <div className="header-content">
           <div className="logo">
-            <div className="logo-icon">⚗️</div>
+            <div className="logo-icon"></div>
             <h1>Chemical Equipment Visualizer</h1>
           </div>
           <div className="header-actions">
@@ -293,13 +293,13 @@ function App() {
         {error && (
           <div className="alert alert-error">
             {error}
-            <button onClick={() => setError(null)}>×</button>
+            <button onClick={() => setError(null)}>x</button>
           </div>
         )}
         {success && (
           <div className="alert alert-success">
             {success}
-            <button onClick={() => setSuccess(null)}>×</button>
+            <button onClick={() => setSuccess(null)}>x</button>
           </div>
         )}
 
@@ -326,7 +326,7 @@ function App() {
                     </>
                   ) : (
                     <>
-                      <div className="upload-icon">📁</div>
+                      <div className="upload-icon"></div>
                       <p className="upload-title">Drag and drop a CSV file</p>
                       <p className="upload-subtitle">or <a href="#">browse</a> to upload</p>
                     </>
@@ -453,7 +453,7 @@ function App() {
               <div className="card">
                 <div className="card-body">
                   <div className="empty-state">
-                    <div className="empty-state-icon">📊</div>
+                    <div className="empty-state-icon"></div>
                     <p className="empty-state-title">No data to display</p>
                     <p className="empty-state-description">Upload a CSV file to view analytics</p>
                   </div>
