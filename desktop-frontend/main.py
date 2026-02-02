@@ -1,6 +1,7 @@
 """
 Chemical Equipment Visualizer - Desktop Application
 PySide6 + Matplotlib frontend for the Django backend API
+//main.py
 """
 
 import sys
