@@ -8,6 +8,20 @@ The project emphasizes clean architecture, robustness, and transparency, with a 
 
 ## Project Overview
 
+## Screenshots
+
+### Web Frontend (React)
+
+![Web Dashboard](screenshots/web_dashboard.png)
+
+### Desktop Application (PySide6)
+
+![Desktop Application](screenshots/desktop_app.png)
+
+### PDF Report Output (Optional)
+
+![Login Page](screenshots/login_page.png)
+
 The system consists of three clearly separated, independently deployable components:
 
 - **Backend (Django REST API)**
