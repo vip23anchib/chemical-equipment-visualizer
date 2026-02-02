@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -33,13 +33,21 @@ function App() {
     if (user) {
       fetchHistory();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = useCallback(() => {
     return {
       'Authorization': 'Basic ' + btoa(user.username + ':' + user.password)
     };
-  };
+  }, [user]);
+
+  const fetchHistory = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/history/`, { headers: getAuthHeaders() });
+      if (res.ok) setHistory(await res.json());
+    } catch { }
+  }, [getAuthHeaders]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -66,13 +74,6 @@ function App() {
     setPassword('');
     setData(null);
     setHistory([]);
-  };
-
-  const fetchHistory = async () => {
-    try {
-      const res = await fetch(`${API}/history/`, { headers: getAuthHeaders() });
-      if (res.ok) setHistory(await res.json());
-    } catch { }
   };
 
   const loadSession = async (item) => {
@@ -328,7 +329,7 @@ function App() {
                     <>
                       <div className="upload-icon"></div>
                       <p className="upload-title">Drag and drop a CSV file</p>
-                      <p className="upload-subtitle">or <a href="#">browse</a> to upload</p>
+                      <p className="upload-subtitle">or <button type="button" style={{ background: 'none', border: 'none', color: '#0052cc', cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'underline' }}>browse</button> to upload</p>
                     </>
                   )}
                 </div>
