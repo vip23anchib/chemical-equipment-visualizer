@@ -160,7 +160,7 @@ class LoginDialog(QDialog):
             response = requests.post(
                 f"{API_BASE_URL}/register/",
                 json={"username": username, "email": email, "password": password},
-                timeout=10
+                timeout=60  # Increased for Render cold-start
             )
             
             if response.status_code == 201:
@@ -239,7 +239,7 @@ class LoginDialog(QDialog):
             response = requests.get(
                 f"{API_BASE_URL}/history/",
                 auth=HTTPBasicAuth(username, password),
-                timeout=5
+                timeout=60  # Increased for Render cold-start
             )
             if response.status_code == 200:
                 auth_credentials = HTTPBasicAuth(username, password)
@@ -554,7 +554,7 @@ class ChemicalVisualizerApp(QMainWindow):
                         f"{API_BASE_URL}/upload/", 
                         files=files, 
                         auth=auth_credentials,
-                        timeout=30
+                        timeout=90  # Increased for Render cold-start
                     )
                     response.raise_for_status()
                     
@@ -604,7 +604,7 @@ class ChemicalVisualizerApp(QMainWindow):
                 response = requests.get(
                     f"{API_BASE_URL}/history/",
                     auth=auth_credentials,
-                    timeout=10
+                    timeout=60  # Increased for Render cold-start
                 )
                 response.raise_for_status()
                 
@@ -667,7 +667,7 @@ class ChemicalVisualizerApp(QMainWindow):
                 response = requests.get(
                     f"{API_BASE_URL}/summary/{session_id}/",
                     auth=auth_credentials,
-                    timeout=10
+                    timeout=60  # Increased for Render cold-start
                 )
                 response.raise_for_status()
                 
