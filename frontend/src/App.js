@@ -256,7 +256,6 @@ function App() {
         <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '20px' }}>
           <div className="card-header" style={{ justifyContent: 'center', borderBottom: 'none', paddingBottom: '0' }}>
             <div className="logo" style={{ flexDirection: 'column', gap: '16px' }}>
-              <div className="logo-icon" style={{ width: '64px', height: '64px', fontSize: '32px' }}></div>
               <h1 style={{ fontSize: '24px' }}>{isRegistering ? 'Create Account' : 'Welcome Back'}</h1>
               <p style={{ color: '#5e6c84' }}>
                 {isRegistering ? 'Sign up for Chemical Equipment Visualizer' : 'Sign in to Chemical Equipment Visualizer'}
