@@ -22,9 +22,9 @@ The project emphasizes clean architecture, robustness, and transparency, with a 
 
 ![Login Page](screenshots/login_page.png)
 
-## 📄 Project Report
+## Generated analysis report
 
-📘 **Detailed Project Report**:  
+📘 **PDF generated after analysis of data**:  
 [View Report (PDF)](report_docs/Chemical_Equipment_Visualizer_Report.pdf)
 
 The system consists of three clearly separated, independently deployable components:
@@ -426,13 +426,6 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000
 
 ---
 
-## License
-
-**ISC License**
-
-This project is open-source and available under the ISC license. See the LICENSE file for details.
-
----
 
 ## Final Note for Evaluators
 
