@@ -22,6 +22,11 @@ The project emphasizes clean architecture, robustness, and transparency, with a 
 
 ![Login Page](screenshots/login_page.png)
 
+## 📄 Project Report
+
+📘 **Detailed Project Report**:  
+[View Report (PDF)](report_docs/Chemical_Equipment_Visualizer_Report.pdf)
+
 The system consists of three clearly separated, independently deployable components:
 
 - **Backend (Django REST API)**
